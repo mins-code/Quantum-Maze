@@ -1,0 +1,327 @@
+/**
+ * GameLevel Styles - Main Gameplay Screen
+ */
+
+.game-level-container {
+    min-height: 100vh;
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.game-level-loading {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    color: var(--text-secondary);
+}
+
+/* Header */
+.game-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem 2rem;
+    background: rgba(15, 17, 25, 0.6);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(0, 243, 255, 0.2);
+    border-radius: 12px;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.level-title {
+    font-family: var(--font-primary);
+    font-size: 2rem;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    background: linear-gradient(135deg, var(--neon-cyan), var(--neon-purple));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin: 0;
+}
+
+.game-stats {
+    display: flex;
+    gap: 2rem;
+    align-items: center;
+}
+
+.stat-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.stat-label {
+    font-family: var(--font-secondary);
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.stat-value {
+    font-family: var(--font-primary);
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--neon-cyan);
+}
+
+.stars-display {
+    display: flex;
+    gap: 0.25rem;
+}
+
+.star {
+    font-size: 1.5rem;
+    color: rgba(255, 255, 255, 0.2);
+    transition: all 0.3s ease;
+}
+
+.star.active {
+    color: var(--warning);
+    text-shadow: 0 0 10px var(--warning);
+    animation: starGlow 1s ease-in-out infinite;
+}
+
+@keyframes starGlow {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.7;
+    }
+}
+
+/* Message Display */
+.game-message {
+    padding: 1rem 2rem;
+    background: rgba(255, 0, 85, 0.1);
+    border: 1px solid var(--error);
+    border-radius: 8px;
+    text-align: center;
+    font-family: var(--font-secondary);
+    font-size: 1rem;
+    color: var(--error);
+    animation: messageSlide 0.3s ease-out;
+}
+
+.game-message.win {
+    background: rgba(0, 255, 136, 0.1);
+    border-color: var(--success);
+    color: var(--success);
+    font-size: 1.2rem;
+    font-weight: 600;
+}
+
+@keyframes messageSlide {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Maze Boards Container */
+.maze-boards-container {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: 2rem;
+    align-items: start;
+    max-width: 1400px;
+    margin: 0 auto;
+    width: 100%;
+}
+
+.boards-divider {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 0;
+}
+
+.sync-indicator {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    position: relative;
+}
+
+.sync-line {
+    width: 2px;
+    height: 200px;
+    background: linear-gradient(to bottom,
+            transparent,
+            var(--neon-cyan),
+            var(--neon-purple),
+            transparent);
+    animation: syncPulse 2s ease-in-out infinite;
+}
+
+.sync-dot {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--neon-cyan);
+    box-shadow: 0 0 20px var(--neon-cyan);
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    animation: syncDotPulse 2s ease-in-out infinite;
+}
+
+.sync-text {
+    font-family: var(--font-primary);
+    font-size: 0.75rem;
+    color: var(--neon-cyan);
+    letter-spacing: 2px;
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+}
+
+@keyframes syncPulse {
+
+    0%,
+    100% {
+        opacity: 0.5;
+    }
+
+    50% {
+        opacity: 1;
+    }
+}
+
+@keyframes syncDotPulse {
+
+    0%,
+    100% {
+        transform: translate(-50%, -50%) scale(1);
+    }
+
+    50% {
+        transform: translate(-50%, -50%) scale(1.3);
+    }
+}
+
+/* Controls */
+.game-controls {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.control-btn {
+    min-width: 150px;
+    padding: 0.75rem 1.5rem;
+}
+
+.control-btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+/* Instructions */
+.game-instructions {
+    background: rgba(15, 17, 25, 0.5);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(0, 243, 255, 0.2);
+    border-radius: 12px;
+    padding: 1.5rem 2rem;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.game-instructions h4 {
+    font-family: var(--font-primary);
+    font-size: 1rem;
+    color: var(--neon-cyan);
+    margin: 0 0 1rem 0;
+    text-align: center;
+    letter-spacing: 2px;
+}
+
+.instructions-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1rem;
+}
+
+.instruction-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.instruction-item kbd {
+    font-family: var(--font-primary);
+    font-size: 0.85rem;
+    padding: 0.5rem 1rem;
+    background: rgba(0, 243, 255, 0.1);
+    border: 1px solid var(--neon-cyan);
+    border-radius: 6px;
+    color: var(--neon-cyan);
+    box-shadow: 0 2px 8px rgba(0, 243, 255, 0.2);
+    min-width: 80px;
+    text-align: center;
+}
+
+.instruction-item span {
+    font-family: var(--font-secondary);
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+    .maze-boards-container {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+    }
+
+    .boards-divider {
+        display: none;
+    }
+}
+
+@media (max-width: 768px) {
+    .game-level-container {
+        padding: 1rem;
+    }
+
+    .game-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .level-title {
+        font-size: 1.5rem;
+    }
+
+    .game-stats {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .instructions-grid {
+        grid-template-columns: 1fr;
+    }
+}

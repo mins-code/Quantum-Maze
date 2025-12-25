@@ -1,44 +1,106 @@
 /**
- * Set Data Structure Implementation
- * Purpose: Tracks activated switches/triggers (unique, no duplicates)
+ * Set Data Structure - SwitchManager
  * 
- * This file will contain:
- * - Set for tracking unique switch states
- * - Add switch to set
- * - Check if switch is activated
- * - Remove switch from set
+ * PURPOSE: Tracks which switches/triggers are currently active
+ * WHY SET: Sets guarantee uniqueness - a switch can only be ON or OFF,
+ * never duplicated. Provides O(1) lookup, insertion, and deletion.
+ * 
+ * ACADEMIC JUSTIFICATION:
+ * - Automatic duplicate prevention (switch can't be activated twice)
+ * - O(1) average-case operations for all methods
+ * - Memory efficient for sparse switch states
+ * - Natural representation of binary states (on/off)
  */
 
-// Placeholder for Set-based switch tracking implementation
-export class SwitchSet {
+export class SwitchManager {
     constructor() {
-        this.activatedSwitches = new Set();
+        this.activeSwitches = new Set();
     }
 
-    // Activate a switch
-    activate(switchId) {
-        // TODO: Implement activate operation
+    /**
+     * Activate a switch
+     * @param {string|number} id - Switch identifier
+     * @returns {boolean} - True if newly activated, false if already active
+     */
+    activate(id) {
+        const wasInactive = !this.activeSwitches.has(id);
+        this.activeSwitches.add(id);
+        return wasInactive;
     }
 
-    // Deactivate a switch
-    deactivate(switchId) {
-        // TODO: Implement deactivate operation
+    /**
+     * Deactivate a switch
+     * @param {string|number} id - Switch identifier
+     * @returns {boolean} - True if was active, false if already inactive
+     */
+    deactivate(id) {
+        return this.activeSwitches.delete(id);
     }
 
-    // Check if switch is activated
-    isActivated(switchId) {
-        // TODO: Implement isActivated check
+    /**
+     * Check if a switch is currently active
+     * @param {string|number} id - Switch identifier
+     * @returns {boolean} - True if active
+     */
+    isActive(id) {
+        return this.activeSwitches.has(id);
     }
 
-    // Get all activated switches
-    getActivated() {
-        // TODO: Implement getter for all activated switches
+    /**
+     * Toggle a switch state
+     * @param {string|number} id - Switch identifier
+     * @returns {boolean} - New state (true = active, false = inactive)
+     */
+    toggle(id) {
+        if (this.isActive(id)) {
+            this.deactivate(id);
+            return false;
+        } else {
+            this.activate(id);
+            return true;
+        }
     }
 
-    // Clear all switches
-    clear() {
-        // TODO: Implement clear operation
+    /**
+     * Get all active switch IDs
+     * @returns {Array} - Array of active switch IDs
+     */
+    getActiveSwitches() {
+        return Array.from(this.activeSwitches);
+    }
+
+    /**
+     * Get the count of active switches
+     * @returns {number} - Number of active switches
+     */
+    getActiveCount() {
+        return this.activeSwitches.size;
+    }
+
+    /**
+     * Reset all switches to inactive
+     */
+    reset() {
+        this.activeSwitches.clear();
+    }
+
+    /**
+     * Check if all specified switches are active
+     * @param {Array} ids - Array of switch IDs to check
+     * @returns {boolean} - True if all are active
+     */
+    areAllActive(ids) {
+        return ids.every(id => this.isActive(id));
+    }
+
+    /**
+     * Check if any of the specified switches are active
+     * @param {Array} ids - Array of switch IDs to check
+     * @returns {boolean} - True if at least one is active
+     */
+    isAnyActive(ids) {
+        return ids.some(id => this.isActive(id));
     }
 }
 
-export default SwitchSet;
+export default SwitchManager;

@@ -55,11 +55,13 @@ app.get('/api/health', (req, res) => {
 const authRoutes = require('./routes/auth');
 const gameRoutes = require('./routes/game');
 const leaderboardRoutes = require('./routes/leaderboard');
+const levelsRoutes = require('./routes/levels');
 
 // Use routes
 app.use('/api/auth', authRoutes);
 app.use('/api/game', gameRoutes);
 app.use('/api/leaderboard', leaderboardRoutes);
+app.use('/api/levels', levelsRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {

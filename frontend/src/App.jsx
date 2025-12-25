@@ -9,6 +9,11 @@ import { AuthProvider } from './context/AuthContext';
 import Login from './components/Auth/Login';
 import Signup from './components/Auth/Signup';
 import Dashboard from './components/Dashboard/Dashboard';
+import LevelSelection from './components/Levels/LevelSelection';
+import GameLevel from './components/Game/GameLevel';
+import Leaderboard from './components/Leaderboard/Leaderboard';
+import Settings from './components/Settings/Settings';
+import EditProfile from './components/Profile/EditProfile';
 import PrivateRoute from './components/Auth/PrivateRoute';
 
 function App() {
@@ -26,6 +31,51 @@ function App() {
             element={
               <PrivateRoute>
                 <Dashboard />
+              </PrivateRoute>
+            }
+          />
+
+          <Route
+            path="/levels"
+            element={
+              <PrivateRoute>
+                <LevelSelection />
+              </PrivateRoute>
+            }
+          />
+
+          <Route
+            path="/play/:id"
+            element={
+              <PrivateRoute>
+                <GameLevel />
+              </PrivateRoute>
+            }
+          />
+
+          <Route
+            path="/leaderboard"
+            element={
+              <PrivateRoute>
+                <Leaderboard />
+              </PrivateRoute>
+            }
+          />
+
+          <Route
+            path="/settings"
+            element={
+              <PrivateRoute>
+                <Settings />
+              </PrivateRoute>
+            }
+          />
+
+          <Route
+            path="/profile"
+            element={
+              <PrivateRoute>
+                <EditProfile />
               </PrivateRoute>
             }
           />

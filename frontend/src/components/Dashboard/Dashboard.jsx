@@ -1,6 +1,6 @@
 /**
  * Dashboard Component - Quantum Maze
- * Main dashboard for authenticated users
+ * Main dashboard with navigation to game features
  */
 
 import React from 'react';
@@ -16,6 +16,37 @@ const Dashboard = () => {
         logout();
         navigate('/login');
     };
+
+    const navigationItems = [
+        {
+            icon: '🎮',
+            title: 'Levels',
+            description: 'Play puzzle levels',
+            path: '/levels',
+            gradient: 'linear-gradient(135deg, var(--neon-cyan), var(--neon-purple))'
+        },
+        {
+            icon: '🏆',
+            title: 'Leaderboard',
+            description: 'View top players',
+            path: '/leaderboard',
+            gradient: 'linear-gradient(135deg, var(--warning), #ff6b35)'
+        },
+        {
+            icon: '👤',
+            title: 'Edit Profile',
+            description: 'Manage your account',
+            path: '/profile',
+            gradient: 'linear-gradient(135deg, var(--neon-purple), #ff0055)'
+        },
+        {
+            icon: '⚙️',
+            title: 'Settings',
+            description: 'Game preferences',
+            path: '/settings',
+            gradient: 'linear-gradient(135deg, #00d4ff, var(--success))'
+        }
+    ];
 
     return (
         <div className="dashboard-container">
@@ -70,29 +101,24 @@ const Dashboard = () => {
                     </div>
                 </div>
 
-                {/* Quick Actions */}
-                <div className="actions-section">
-                    <h3>Quick Actions</h3>
-                    <div className="actions-grid">
-                        <button className="action-card glass-card neon-border">
-                            <span className="action-icon">🎯</span>
-                            <span className="action-text">Start New Level</span>
-                        </button>
-
-                        <button className="action-card glass-card neon-border">
-                            <span className="action-icon">📊</span>
-                            <span className="action-text">View Leaderboard</span>
-                        </button>
-
-                        <button className="action-card glass-card neon-border">
-                            <span className="action-icon">👤</span>
-                            <span className="action-text">Edit Profile</span>
-                        </button>
-
-                        <button className="action-card glass-card neon-border">
-                            <span className="action-icon">⚙️</span>
-                            <span className="action-text">Settings</span>
-                        </button>
+                {/* Navigation Cards */}
+                <div className="navigation-section">
+                    <h3 className="section-title">What would you like to do?</h3>
+                    <div className="navigation-grid">
+                        {navigationItems.map((item, index) => (
+                            <div
+                                key={index}
+                                className="nav-card glass-card"
+                                onClick={() => navigate(item.path)}
+                                style={{ '--card-gradient': item.gradient }}
+                            >
+                                <div className="nav-card-glow" style={{ background: item.gradient }}></div>
+                                <div className="nav-icon">{item.icon}</div>
+                                <h4 className="nav-title">{item.title}</h4>
+                                <p className="nav-description">{item.description}</p>
+                                <div className="nav-arrow">→</div>
+                            </div>
+                        ))}
                     </div>
                 </div>
             </main>

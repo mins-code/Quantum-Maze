@@ -1,42 +1,81 @@
 /**
- * Queue Data Structure Implementation
- * Purpose: Buffers and processes player input commands in FIFO order
+ * Queue Data Structure - InputQueue
  * 
- * This file will contain:
- * - Queue for input buffering
- * - Enqueue operation (add input)
- * - Dequeue operation (process input)
+ * PURPOSE: Buffers keyboard inputs using FIFO (First In, First Out)
+ * WHY QUEUE: Ensures inputs are processed in the order they were received,
+ * preventing "ghost inputs" and maintaining game fairness.
+ * 
+ * ACADEMIC JUSTIFICATION:
+ * - FIFO principle ensures fair input processing
+ * - Prevents input loss during rapid key presses
+ * - O(1) enqueue and dequeue operations
+ * - Essential for responsive game controls
  */
 
-// Placeholder for Queue-based input buffer implementation
 export class InputQueue {
     constructor() {
-        this.queue = [];
+        this.items = [];
     }
 
-    // Add input to queue
+    /**
+     * Add an input to the end of the queue
+     * @param {*} input - Input data to enqueue
+     */
     enqueue(input) {
-        // TODO: Implement enqueue operation
+        this.items.push(input);
     }
 
-    // Process next input from queue
+    /**
+     * Remove and return the first input from the queue
+     * @returns {*} - The dequeued input or null if empty
+     */
     dequeue() {
-        // TODO: Implement dequeue operation
+        if (this.isEmpty()) {
+            return null;
+        }
+        return this.items.shift();
     }
 
-    // Check if queue is empty
+    /**
+     * View the first input without removing it
+     * @returns {*} - The first input or null if empty
+     */
+    peek() {
+        if (this.isEmpty()) {
+            return null;
+        }
+        return this.items[0];
+    }
+
+    /**
+     * Check if the queue is empty
+     * @returns {boolean} - True if empty
+     */
     isEmpty() {
-        // TODO: Implement isEmpty check
+        return this.items.length === 0;
     }
 
-    // Get queue size
+    /**
+     * Get the current size of the queue
+     * @returns {number} - Number of items in queue
+     */
     size() {
-        // TODO: Implement size getter
+        return this.items.length;
     }
 
-    // Clear queue
+    /**
+     * Clear all inputs from the queue
+     */
     clear() {
-        // TODO: Implement clear operation
+        this.items = [];
+    }
+
+    /**
+     * Get all items in the queue (for debugging)
+     * @returns {Array} - Copy of all items
+     */
+    getAll() {
+        return [...this.items];
     }
 }
 
