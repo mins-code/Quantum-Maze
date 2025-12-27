@@ -3,7 +3,7 @@
 /* Fonts are now preloaded in index.html */
 
 :root {
-  /* Cyberpunk Color Palette */
+  /* Cyberpunk Color Palette - Dark Mode */
   --bg-primary: #0b0d17;
   --bg-secondary: #0f1119;
   --bg-card: rgba(15, 17, 25, 0.7);
@@ -34,6 +34,34 @@
   --font-primary: 'Orbitron', sans-serif;
   --font-secondary: 'Rajdhani', sans-serif;
 }
+
+/* Light Mode Theme */
+[data-theme="light"] {
+  --bg-primary: #f5f7fa;
+  --bg-secondary: #ffffff;
+  --bg-card: rgba(255, 255, 255, 0.8);
+
+  --neon-cyan: #0891b2;
+  --neon-purple: #7c3aed;
+  --neon-pink: #db2777;
+  --neon-blue: #2563eb;
+
+  --text-primary: #1a1d2e;
+  --text-secondary: #4a5568;
+  --text-muted: #718096;
+
+  --success: #059669;
+  --error: #dc2626;
+  --warning: #d97706;
+
+  --glass-bg: rgba(255, 255, 255, 0.8);
+  --glass-border: rgba(0, 0, 0, 0.1);
+
+  --shadow-neon-cyan: 0 0 20px rgba(8, 145, 178, 0.3);
+  --shadow-neon-purple: 0 0 20px rgba(124, 58, 237, 0.3);
+  --shadow-glow: 0 0 40px rgba(8, 145, 178, 0.2);
+}
+
 
 * {
   margin: 0;
@@ -88,11 +116,26 @@ body::after {
   width: 100%;
   height: 100%;
   background-image:
-    linear-gradient(rgba(0, 243, 255, 0.1) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0, 243, 255, 0.1) 1px, transparent 1px);
+    linear-gradient(rgba(0, 243, 255, 0.12) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 243, 255, 0.12) 1px, transparent 1px);
   background-size: 50px 50px;
   z-index: 0;
   pointer-events: none;
+}
+
+/* Light Mode Background */
+[data-theme="light"] body::before {
+  background:
+    radial-gradient(circle at 20% 50%, rgba(8, 145, 178, 0.08) 0%, transparent 60%),
+    radial-gradient(circle at 80% 80%, rgba(124, 58, 237, 0.08) 0%, transparent 60%),
+    radial-gradient(circle at 40% 20%, rgba(219, 39, 119, 0.06) 0%, transparent 60%);
+}
+
+/* Light Mode Grid */
+[data-theme="light"] body::after {
+  background-image:
+    linear-gradient(rgba(8, 145, 178, 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(8, 145, 178, 0.06) 1px, transparent 1px);
 }
 
 #root {

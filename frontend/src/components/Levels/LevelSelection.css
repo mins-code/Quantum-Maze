@@ -1,5 +1,5 @@
 /**
- * LevelSelection Styles
+ * LevelSelection Styles - Improved Visibility
  */
 
 .level-selection-container {
@@ -16,14 +16,14 @@
 
 .back-btn {
     padding: 0.75rem 1.5rem;
-    font-size: 1rem;
+    font-size: 0.95rem;
 }
 
 .levels-title {
     font-family: var(--font-primary);
-    font-size: 2.5rem;
+    font-size: 1.8rem;
     font-weight: 700;
-    letter-spacing: 3px;
+    letter-spacing: 2px;
     text-transform: uppercase;
     background: linear-gradient(135deg, var(--neon-cyan), var(--neon-purple));
     -webkit-background-clip: text;
@@ -43,24 +43,29 @@
 
 .levels-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-    gap: 2rem;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
     max-width: 1400px;
     margin: 0 auto;
 }
 
 .level-card {
     position: relative;
-    padding: 2rem;
+    padding: 1.75rem;
+    padding-right: 5rem;
     cursor: pointer;
     transition: all 0.3s ease;
     overflow: hidden;
-    min-height: 280px;
+    min-height: 260px;
+    background: rgba(15, 17, 25, 0.7);
+    border: 1px solid rgba(0, 243, 255, 0.3);
 }
 
 .level-card:hover {
     transform: translateY(-8px);
-    box-shadow: 0 12px 40px rgba(0, 243, 255, 0.3);
+    box-shadow: 0 12px 40px rgba(0, 243, 255, 0.4);
+    background: rgba(15, 17, 25, 0.85);
+    border-color: rgba(0, 243, 255, 0.5);
 }
 
 .level-card.locked {
@@ -70,45 +75,54 @@
 
 .level-card.locked:hover {
     transform: none;
+    background: rgba(15, 17, 25, 0.7);
 }
 
 .level-badge {
     position: absolute;
     top: 1rem;
     right: 1rem;
-    width: 60px;
-    height: 60px;
+    width: 55px;
+    height: 55px;
     border-radius: 50%;
     background: linear-gradient(135deg, var(--neon-cyan), var(--neon-purple));
     display: flex;
     align-items: center;
     justify-content: center;
     box-shadow: 0 0 20px rgba(0, 243, 255, 0.5);
+    z-index: 2;
 }
 
 .level-number {
     font-family: var(--font-primary);
-    font-size: 1.8rem;
+    font-size: 1.6rem;
     font-weight: 700;
-    color: var(--bg-primary);
+    color: #0b0d17;
 }
 
 .level-info {
     margin-bottom: 1.5rem;
+    padding-right: 0;
+    position: relative;
+    z-index: 1;
 }
 
 .level-name {
     font-family: var(--font-primary);
-    font-size: 1.4rem;
-    color: var(--text-primary);
+    font-size: 1.1rem;
+    color: #e0e6ff;
     margin: 0 0 0.5rem 0;
+    font-weight: 600;
+    max-width: calc(100% - 10px);
+    word-wrap: break-word;
 }
 
 .level-description {
-    font-size: 0.95rem;
-    color: var(--text-secondary);
+    font-size: 0.85rem;
+    color: #a0a8c0;
     margin: 0;
-    line-height: 1.6;
+    line-height: 1.5;
+    max-width: 100%;
 }
 
 .level-stats {
@@ -119,13 +133,13 @@
 }
 
 .difficulty-badge {
-    padding: 0.5rem 1.2rem;
+    padding: 0.45rem 1rem;
     border: 2px solid;
-    border-radius: 25px;
-    font-size: 0.8rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
     font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 1.5px;
+    letter-spacing: 1.2px;
 }
 
 .par-moves {
@@ -135,13 +149,13 @@
 }
 
 .par-label {
-    font-size: 0.9rem;
-    color: var(--text-muted);
+    font-size: 0.85rem;
+    color: #8892b0;
 }
 
 .par-value {
     font-family: var(--font-primary);
-    font-size: 1.2rem;
+    font-size: 1.1rem;
     color: var(--neon-cyan);
     font-weight: 700;
 }
@@ -154,7 +168,7 @@
 }
 
 .level-stars .star {
-    font-size: 1.8rem;
+    font-size: 1.6rem;
     color: rgba(255, 255, 255, 0.2);
     transition: all 0.3s ease;
 }
@@ -181,13 +195,14 @@
     position: absolute;
     top: 1rem;
     left: 1rem;
-    padding: 0.5rem 1.2rem;
+    padding: 0.45rem 1rem;
     background: rgba(0, 255, 136, 0.2);
     border: 2px solid var(--success);
-    border-radius: 25px;
-    font-size: 0.8rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
     color: var(--success);
     font-weight: 700;
+    z-index: 2;
 }
 
 .locked-overlay {
@@ -203,10 +218,11 @@
     align-items: center;
     justify-content: center;
     gap: 0.75rem;
+    z-index: 3;
 }
 
 .lock-icon {
-    font-size: 3.5rem;
+    font-size: 3rem;
     filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.3));
 }
 
@@ -215,10 +231,11 @@
     bottom: 0;
     left: 0;
     right: 0;
-    padding: 1.2rem;
+    padding: 1rem;
     background: linear-gradient(to top, rgba(0, 243, 255, 0.15), transparent);
     opacity: 0;
     transition: opacity 0.3s ease;
+    z-index: 2;
 }
 
 .level-card:hover .play-overlay {
@@ -227,23 +244,55 @@
 
 .play-btn {
     width: 100%;
-    padding: 0.9rem;
+    padding: 0.85rem;
     background: linear-gradient(135deg, var(--neon-cyan), var(--neon-purple));
     border: none;
     border-radius: 10px;
-    color: var(--bg-primary);
+    color: #0b0d17;
     font-family: var(--font-primary);
-    font-size: 1.1rem;
+    font-size: 1rem;
     font-weight: 700;
     cursor: pointer;
     transition: all 0.3s ease;
     text-transform: uppercase;
-    letter-spacing: 2px;
+    letter-spacing: 1.5px;
 }
 
 .play-btn:hover {
     transform: scale(1.05);
     box-shadow: 0 0 25px rgba(0, 243, 255, 0.6);
+}
+
+/* Light Mode Overrides */
+[data-theme="light"] .level-card {
+    background: rgba(255, 255, 255, 0.7);
+    border-color: rgba(0, 0, 0, 0.15);
+}
+
+[data-theme="light"] .level-card:hover {
+    background: rgba(255, 255, 255, 0.9);
+    border-color: rgba(8, 145, 178, 0.4);
+    box-shadow: 0 12px 40px rgba(8, 145, 178, 0.2);
+}
+
+[data-theme="light"] .level-name {
+    color: #1a1d2e;
+}
+
+[data-theme="light"] .level-description {
+    color: #4a5568;
+}
+
+[data-theme="light"] .par-label {
+    color: #718096;
+}
+
+[data-theme="light"] .locked-overlay {
+    background: rgba(255, 255, 255, 0.85);
+}
+
+[data-theme="light"] .play-btn {
+    color: #ffffff;
 }
 
 /* Responsive */
@@ -259,10 +308,22 @@
     }
 
     .levels-title {
-        font-size: 1.8rem;
+        font-size: 1.5rem;
     }
 
     .levels-grid {
         grid-template-columns: 1fr;
+    }
+
+    .level-card {
+        padding-right: 4.5rem;
+    }
+
+    .level-name {
+        font-size: 1rem;
+    }
+
+    .level-description {
+        font-size: 0.8rem;
     }
 }
