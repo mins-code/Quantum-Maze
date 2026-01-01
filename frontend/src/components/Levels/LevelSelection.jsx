@@ -1,6 +1,7 @@
 /**
- * LevelSelection Component - Dedicated Levels Page
- * Displays all available levels for selection
+ * LevelSelection Component - With User Progress
+ * Displays all available levels with unlock status
+ * Level 1 is ALWAYS unlocked
  */
 
 import React, { useState, useEffect } from 'react';
@@ -15,13 +16,21 @@ const LevelSelection = () => {
     const [error, setError] = useState('');
 
     useEffect(() => {
-        fetchLevels();
+        fetchLevelsWithProgress();
     }, []);
 
-    const fetchLevels = async () => {
+    /**
+     * Fetch levels with user's progress merged
+     * Uses /api/progress/levels endpoint which:
+     * - Returns all levels
+     * - Merges user's completion status
+     * - Ensures Level 1 is ALWAYS unlocked
+     */
+    const fetchLevelsWithProgress = async () => {
         try {
             setLoading(true);
-            const response = await api.get('/levels');
+            // Use progress endpoint to get levels with user's progress
+            const response = await api.get('/progress/levels');
             setLevels(response.data.data);
             setError('');
         } catch (err) {
@@ -32,8 +41,12 @@ const LevelSelection = () => {
         }
     };
 
-    const handlePlayLevel = (levelId) => {
-        navigate(`/play/${levelId}`);
+    const handlePlayLevel = (level) => {
+        // Level 1 is ALWAYS playable
+        // Other levels check isUnlocked status
+        if (level.levelId === 1 || level.isUnlocked) {
+            navigate(`/play/${level.levelId}`);
+        }
     };
 
     const getDifficultyColor = (difficulty) => {
@@ -83,76 +96,82 @@ const LevelSelection = () => {
 
             {/* Levels Grid */}
             <div className="levels-grid">
-                {levels.map((level) => (
-                    <div
-                        key={level.levelId}
-                        className={`level-card glass-card ${!level.isUnlocked ? 'locked' : ''}`}
-                        onClick={() => level.isUnlocked && handlePlayLevel(level.levelId)}
-                    >
-                        {/* Level Number Badge */}
-                        <div className="level-badge">
-                            <span className="level-number">{level.levelId}</span>
-                        </div>
+                {levels.map((level) => {
+                    // Level 1 is ALWAYS unlocked (bootstrap level)
+                    const isUnlocked = level.levelId === 1 || level.isUnlocked;
 
-                        {/* Level Info */}
-                        <div className="level-info">
-                            <h4 className="level-name">{level.name}</h4>
-                            <p className="level-description">{level.description}</p>
-                        </div>
-
-                        {/* Level Stats */}
-                        <div className="level-stats">
-                            <div
-                                className="difficulty-badge"
-                                style={{ borderColor: getDifficultyColor(level.difficulty) }}
-                            >
-                                <span style={{ color: getDifficultyColor(level.difficulty) }}>
-                                    {level.difficulty}
-                                </span>
+                    return (
+                        <div
+                            key={level.levelId}
+                            className={`level-card glass-card ${!isUnlocked ? 'locked' : ''}`}
+                            onClick={() => handlePlayLevel(level)}
+                        >
+                            {/* Level Number Badge */}
+                            <div className="level-badge">
+                                <span className="level-number">{level.levelId}</span>
                             </div>
-                            <div className="par-moves">
-                                <span className="par-label">Par:</span>
-                                <span className="par-value">{level.parMoves}</span>
-                            </div>
-                        </div>
 
-                        {/* Stars Display */}
-                        <div className="level-stars">
-                            {[1, 2, 3].map(i => (
-                                <span
-                                    key={i}
-                                    className={`star ${i <= level.stars ? 'earned' : ''}`}
+                            {/* Level Info */}
+                            <div className="level-info">
+                                <h4 className="level-name">{level.name}</h4>
+                                <p className="level-description">{level.description}</p>
+                            </div>
+
+                            {/* Level Stats */}
+                            <div className="level-stats">
+                                <div
+                                    className="difficulty-badge"
+                                    style={{ borderColor: getDifficultyColor(level.difficulty) }}
                                 >
-                                    ★
-                                </span>
-                            ))}
+                                    <span style={{ color: getDifficultyColor(level.difficulty) }}>
+                                        {level.difficulty}
+                                    </span>
+                                </div>
+                                <div className="par-moves">
+                                    <span className="par-label">Par:</span>
+                                    <span className="par-value">{level.parMoves}</span>
+                                </div>
+                            </div>
+
+                            {/* Stars Display */}
+                            <div className="level-stars">
+                                {[1, 2, 3].map(i => (
+                                    <span
+                                        key={i}
+                                        className={`star ${i <= (level.stars || 0) ? 'earned' : ''}`}
+                                    >
+                                        ★
+                                    </span>
+                                ))}
+                            </div>
+
+                            {/* Completed Badge */}
+                            {level.isCompleted && (
+                                <div className="completed-badge">
+                                    ✓ Completed
+                                </div>
+                            )}
+
+                            {/* Locked Overlay */}
+                            {!isUnlocked && (
+                                <div className="locked-overlay">
+                                    <div className="lock-icon">🔒</div>
+                                    <p>Locked</p>
+                                    <p className="unlock-hint">Complete Level {level.levelId - 1}</p>
+                                </div>
+                            )}
+
+                            {/* Play Button */}
+                            {isUnlocked && (
+                                <div className="play-overlay">
+                                    <button className="play-btn">
+                                        ▶ Play
+                                    </button>
+                                </div>
+                            )}
                         </div>
-
-                        {/* Completed Badge */}
-                        {level.isCompleted && (
-                            <div className="completed-badge">
-                                ✓ Completed
-                            </div>
-                        )}
-
-                        {/* Locked Overlay */}
-                        {!level.isUnlocked && (
-                            <div className="locked-overlay">
-                                <div className="lock-icon">🔒</div>
-                                <p>Locked</p>
-                            </div>
-                        )}
-
-                        {/* Play Button */}
-                        {level.isUnlocked && (
-                            <div className="play-overlay">
-                                <button className="play-btn">
-                                    ▶ Play
-                                </button>
-                            </div>
-                        )}
-                    </div>
-                ))}
+                    );
+                })}
             </div>
         </div>
     );

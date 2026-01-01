@@ -1,94 +1,12 @@
 /**
- * Levels Routes - Quantum Maze
- * 
- * API endpoints for level management
+ * Level Routes - Quantum Maze
+ * API endpoints for level management and retrieval
  */
 
 const express = require('express');
 const router = express.Router();
 const { protect } = require('../middleware/authMiddleware');
-
-// Mock level data (temporary until Level Editor is built)
-const MOCK_LEVELS = [
-    {
-        levelId: 1,
-        name: "Tutorial: First Steps",
-        description: "Learn the basics of mirrored movement",
-        difficulty: "Easy",
-        gridLeft: [
-            [3, 0, 0, 0, 0],
-            [1, 1, 0, 1, 1],
-            [0, 0, 0, 0, 0],
-            [1, 1, 0, 1, 1],
-            [0, 0, 0, 0, 2]
-        ],
-        gridRight: [
-            [0, 0, 0, 0, 3],
-            [1, 1, 0, 1, 1],
-            [0, 0, 0, 0, 0],
-            [1, 1, 0, 1, 1],
-            [2, 0, 0, 0, 0]
-        ],
-        parMoves: 8,
-        stars: 0,
-        isUnlocked: true,
-        isCompleted: false
-    },
-    {
-        levelId: 2,
-        name: "Mirror Maze",
-        description: "Navigate through symmetric obstacles",
-        difficulty: "Medium",
-        gridLeft: [
-            [3, 0, 1, 0, 0, 0],
-            [0, 0, 1, 0, 1, 0],
-            [0, 1, 0, 0, 1, 0],
-            [0, 1, 0, 1, 0, 0],
-            [0, 0, 0, 1, 0, 1],
-            [0, 0, 0, 0, 0, 2]
-        ],
-        gridRight: [
-            [0, 0, 0, 1, 0, 3],
-            [0, 1, 0, 1, 0, 0],
-            [0, 1, 0, 0, 1, 0],
-            [0, 0, 1, 0, 1, 0],
-            [1, 0, 1, 0, 0, 0],
-            [2, 0, 0, 0, 0, 0]
-        ],
-        parMoves: 12,
-        stars: 0,
-        isUnlocked: true,
-        isCompleted: false
-    },
-    {
-        levelId: 3,
-        name: "Quantum Corridor",
-        description: "Master the art of synchronized movement",
-        difficulty: "Hard",
-        gridLeft: [
-            [3, 0, 0, 1, 0, 0, 0],
-            [1, 1, 0, 1, 0, 1, 0],
-            [0, 0, 0, 0, 0, 1, 0],
-            [0, 1, 1, 1, 0, 0, 0],
-            [0, 0, 0, 0, 0, 1, 1],
-            [1, 1, 0, 1, 0, 0, 0],
-            [0, 0, 0, 1, 0, 0, 2]
-        ],
-        gridRight: [
-            [0, 0, 0, 1, 0, 0, 3],
-            [0, 1, 0, 1, 0, 1, 1],
-            [0, 1, 0, 0, 0, 0, 0],
-            [0, 0, 0, 1, 1, 1, 0],
-            [1, 1, 0, 0, 0, 0, 0],
-            [0, 0, 0, 1, 0, 1, 1],
-            [2, 0, 0, 1, 0, 0, 0]
-        ],
-        parMoves: 15,
-        stars: 0,
-        isUnlocked: true,
-        isCompleted: false
-    }
-];
+const Level = require('../models/Level');
 
 /**
  * @route   GET /api/levels
@@ -97,42 +15,53 @@ const MOCK_LEVELS = [
  */
 router.get('/', protect, async (req, res) => {
     try {
-        // In the future, this will fetch from database
-        // For now, return mock data
-        res.json({
+        // Fetch all levels from database, sorted by levelId
+        const levels = await Level.find({}).sort({ levelId: 1 });
+
+        res.status(200).json({
             success: true,
-            count: MOCK_LEVELS.length,
-            data: MOCK_LEVELS
+            count: levels.length,
+            data: levels
         });
     } catch (error) {
         console.error('Error fetching levels:', error);
         res.status(500).json({
             success: false,
-            message: 'Server error'
+            message: 'Failed to fetch levels',
+            error: error.message
         });
     }
 });
 
 /**
  * @route   GET /api/levels/:id
- * @desc    Get single level by ID
+ * @desc    Get a single level by levelId
  * @access  Protected
  */
 router.get('/:id', protect, async (req, res) => {
     try {
         const levelId = parseInt(req.params.id);
 
-        // Find level in mock data
-        const level = MOCK_LEVELS.find(l => l.levelId === levelId);
-
-        if (!level) {
-            return res.status(404).json({
+        // Validate levelId is a number
+        if (isNaN(levelId)) {
+            return res.status(400).json({
                 success: false,
-                message: 'Level not found'
+                message: 'Invalid level ID. Must be a number.'
             });
         }
 
-        res.json({
+        // Find level by levelId
+        const level = await Level.findOne({ levelId });
+
+        // Check if level exists
+        if (!level) {
+            return res.status(404).json({
+                success: false,
+                message: `Level ${levelId} not found`
+            });
+        }
+
+        res.status(200).json({
             success: true,
             data: level
         });
@@ -140,39 +69,98 @@ router.get('/:id', protect, async (req, res) => {
         console.error('Error fetching level:', error);
         res.status(500).json({
             success: false,
-            message: 'Server error'
+            message: 'Failed to fetch level',
+            error: error.message
         });
     }
 });
 
 /**
  * @route   POST /api/levels/:id/complete
- * @desc    Mark level as completed and save score
+ * @desc    Mark a level as completed and save score
  * @access  Protected
  */
 router.post('/:id/complete', protect, async (req, res) => {
     try {
         const levelId = parseInt(req.params.id);
-        const { moves, stars, time } = req.body;
+        const { moves, time, stars } = req.body;
 
-        // In the future, save to database
-        // For now, just return success
+        // Validate input
+        if (isNaN(levelId)) {
+            return res.status(400).json({
+                success: false,
+                message: 'Invalid level ID'
+            });
+        }
 
-        res.json({
+        // Find the level
+        const level = await Level.findOne({ levelId });
+
+        if (!level) {
+            return res.status(404).json({
+                success: false,
+                message: `Level ${levelId} not found`
+            });
+        }
+
+        // Calculate stars if not provided
+        const earnedStars = stars !== undefined ? stars : level.calculateStars(moves);
+
+        // TODO: Save user progress to UserProgress collection
+        // For now, just return success with calculated stars
+        res.status(200).json({
             success: true,
             message: 'Level completed!',
             data: {
                 levelId,
                 moves,
-                stars,
-                time
+                time,
+                stars: earnedStars,
+                parMoves: level.parMoves
             }
         });
     } catch (error) {
         console.error('Error completing level:', error);
         res.status(500).json({
             success: false,
-            message: 'Server error'
+            message: 'Failed to save level completion',
+            error: error.message
+        });
+    }
+});
+
+/**
+ * @route   GET /api/levels/difficulty/:difficulty
+ * @desc    Get levels by difficulty
+ * @access  Protected
+ */
+router.get('/difficulty/:difficulty', protect, async (req, res) => {
+    try {
+        const { difficulty } = req.params;
+
+        // Validate difficulty
+        const validDifficulties = ['Easy', 'Medium', 'Hard', 'Expert'];
+        if (!validDifficulties.includes(difficulty)) {
+            return res.status(400).json({
+                success: false,
+                message: `Invalid difficulty. Must be one of: ${validDifficulties.join(', ')}`
+            });
+        }
+
+        // Find levels by difficulty
+        const levels = await Level.find({ difficulty }).sort({ levelId: 1 });
+
+        res.status(200).json({
+            success: true,
+            count: levels.length,
+            data: levels
+        });
+    } catch (error) {
+        console.error('Error fetching levels by difficulty:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to fetch levels',
+            error: error.message
         });
     }
 });

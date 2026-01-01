@@ -3,14 +3,66 @@
  * Main dashboard with navigation to game features
  */
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import api from '../../utils/api';
 import './Dashboard.css';
 
 const Dashboard = () => {
     const { user, logout } = useAuth();
     const navigate = useNavigate();
+    const [progress, setProgress] = useState(null);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        fetchUserProgress();
+    }, []);
+
+    const fetchUserProgress = async () => {
+        try {
+            setLoading(true);
+            const response = await api.get('/progress');
+            setProgress(response.data.data);
+        } catch (error) {
+            console.error('Error fetching progress:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    /**
+     * Calculate total score based on performance
+     * Scoring system:
+     * - 3 stars: 1000 points
+     * - 2 stars: 600 points
+     * - 1 star: 300 points
+     * - 0 stars: 100 points (completion bonus)
+     */
+    const calculateTotalScore = () => {
+        if (!progress || !progress.completedLevels) return 0;
+
+        return progress.completedLevels.reduce((total, level) => {
+            let score = 0;
+
+            // Base score from stars
+            switch (level.stars) {
+                case 3:
+                    score = 1000;
+                    break;
+                case 2:
+                    score = 600;
+                    break;
+                case 1:
+                    score = 300;
+                    break;
+                default:
+                    score = 100; // Completion bonus
+            }
+
+            return total + score;
+        }, 0);
+    };
 
     const handleLogout = () => {
         logout();
@@ -48,6 +100,10 @@ const Dashboard = () => {
         }
     ];
 
+    const totalStars = progress?.totalStars || 0;
+    const levelsCompleted = progress?.completedLevels?.length || 0;
+    const totalScore = calculateTotalScore();
+
     return (
         <div className="dashboard-container">
             {/* Header */}
@@ -84,19 +140,25 @@ const Dashboard = () => {
                 <div className="stats-grid">
                     <div className="stat-card glass-card">
                         <div className="stat-icon">⭐</div>
-                        <div className="stat-value">{user?.totalStars || 0}</div>
+                        <div className="stat-value">
+                            {loading ? '...' : totalStars}
+                        </div>
                         <div className="stat-label">Total Stars</div>
                     </div>
 
                     <div className="stat-card glass-card">
                         <div className="stat-icon">🎮</div>
-                        <div className="stat-value">{user?.levelsCompleted || 0}</div>
+                        <div className="stat-value">
+                            {loading ? '...' : levelsCompleted}
+                        </div>
                         <div className="stat-label">Levels Completed</div>
                     </div>
 
                     <div className="stat-card glass-card">
                         <div className="stat-icon">🏆</div>
-                        <div className="stat-value">{user?.totalScore || 0}</div>
+                        <div className="stat-value">
+                            {loading ? '...' : totalScore.toLocaleString()}
+                        </div>
                         <div className="stat-label">Total Score</div>
                     </div>
                 </div>
@@ -127,3 +189,4 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
+

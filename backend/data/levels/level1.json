@@ -1,0 +1,85 @@
+{
+    "levelId": 1,
+    "name": "The Awakening",
+    "difficulty": "Easy",
+    "description": "Navigate mirrored corridors. Learn the basics of synchronized movement.",
+    "gridLeft": [
+        [
+            1,
+            1,
+            1,
+            1,
+            1
+        ],
+        [
+            1,
+            3,
+            0,
+            0,
+            1
+        ],
+        [
+            1,
+            0,
+            1,
+            0,
+            1
+        ],
+        [
+            1,
+            0,
+            0,
+            2,
+            1
+        ],
+        [
+            1,
+            1,
+            1,
+            1,
+            1
+        ]
+    ],
+    "gridRight": [
+        [
+            1,
+            1,
+            1,
+            1,
+            1
+        ],
+        [
+            1,
+            0,
+            0,
+            3,
+            1
+        ],
+        [
+            1,
+            0,
+            1,
+            0,
+            1
+        ],
+        [
+            1,
+            2,
+            0,
+            0,
+            1
+        ],
+        [
+            1,
+            1,
+            1,
+            1,
+            1
+        ]
+    ],
+    "parMoves": 8,
+    "unlockRequirement": 0,
+    "stars": 0,
+    "isUnlocked": true,
+    "isCompleted": false
+}

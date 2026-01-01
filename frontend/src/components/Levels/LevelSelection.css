@@ -193,7 +193,7 @@
 
 .completed-badge {
     position: absolute;
-    top: 1rem;
+    bottom: 5.5rem;
     left: 1rem;
     padding: 0.45rem 1rem;
     background: rgba(0, 255, 136, 0.2);

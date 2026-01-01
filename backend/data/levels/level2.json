@@ -1,0 +1,141 @@
+{
+    "levelId": 2,
+    "name": "Mirror Maze",
+    "difficulty": "Medium",
+    "description": "Navigate through symmetric obstacles. Both players must reach their goals.",
+    "gridLeft": [
+        [
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1
+        ],
+        [
+            1,
+            3,
+            0,
+            0,
+            1,
+            0,
+            1
+        ],
+        [
+            1,
+            0,
+            1,
+            0,
+            0,
+            0,
+            1
+        ],
+        [
+            1,
+            0,
+            0,
+            1,
+            1,
+            0,
+            1
+        ],
+        [
+            1,
+            0,
+            1,
+            0,
+            0,
+            0,
+            1
+        ],
+        [
+            1,
+            0,
+            0,
+            0,
+            1,
+            2,
+            1
+        ],
+        [
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1
+        ]
+    ],
+    "gridRight": [
+        [
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1
+        ],
+        [
+            1,
+            0,
+            1,
+            0,
+            0,
+            3,
+            1
+        ],
+        [
+            1,
+            0,
+            0,
+            0,
+            1,
+            0,
+            1
+        ],
+        [
+            1,
+            0,
+            1,
+            1,
+            0,
+            0,
+            1
+        ],
+        [
+            1,
+            0,
+            0,
+            0,
+            1,
+            0,
+            1
+        ],
+        [
+            1,
+            2,
+            1,
+            0,
+            0,
+            0,
+            1
+        ],
+        [
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1
+        ]
+    ],
+    "parMoves": 12,
+    "unlockRequirement": 1,
+    "stars": 0,
+    "isUnlocked": false,
+    "isCompleted": false
+}

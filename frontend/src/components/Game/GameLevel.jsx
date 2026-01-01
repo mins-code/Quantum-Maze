@@ -49,6 +49,8 @@ const GameLevel = () => {
             try {
                 setLoading(true);
                 setError('');
+                // Reset victory modal when changing levels
+                setShowVictoryModal(false);
 
                 // Fetch level data from API
                 const response = await api.get(`/levels/${id}`);
@@ -118,6 +120,22 @@ const GameLevel = () => {
         return () => window.removeEventListener('keydown', handleKeyDown);
     }, [gameState]);
 
+    const saveLevelCompletion = async (moves, time) => {
+        try {
+            const response = await api.post(`/progress/complete/${id}`, {
+                moves,
+                time
+            });
+
+            console.log('Level completion saved:', response.data);
+            return response.data;
+        } catch (error) {
+            console.error('Error saving level completion:', error);
+            // Don't block the victory modal if saving fails
+            return null;
+        }
+    };
+
     const handleMove = (direction) => {
         const result = engineRef.current.handleInput(direction);
 
@@ -133,6 +151,9 @@ const GameLevel = () => {
             updateStats();
 
             if (result.hasWon) {
+                // Save level completion to backend
+                const currentStats = engineRef.current.getStats();
+                saveLevelCompletion(currentStats.moveCount, currentStats.elapsedTime);
                 setShowVictoryModal(true);
             } else {
                 setMessage('');
