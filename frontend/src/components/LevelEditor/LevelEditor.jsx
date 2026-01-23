@@ -21,14 +21,14 @@ const LevelEditor = () => {
 
     // Tile metadata for comprehensive toolbox
     const TILE_METADATA = [
-        { type: TILE_TYPES.EMPTY, name: 'Empty', icon: '⬜', color: '#0a0e27' },
-        { type: TILE_TYPES.WALL, name: 'Wall', icon: '⬛', color: '#2d2d44' },
-        { type: TILE_TYPES.START, name: 'Start', icon: '🟢', color: '#00ff88' },
-        { type: TILE_TYPES.GOAL, name: 'Goal', icon: '🟡', color: '#ffd700' },
-        { type: TILE_TYPES.SWITCH, name: 'Switch', icon: '🔘', color: '#8a2be2' },
-        { type: TILE_TYPES.DOOR, name: 'Door', icon: '🚪', color: '#ff6b6b' },
-        { type: TILE_TYPES.PORTAL, name: 'Portal', icon: '🌀', color: '#00d4ff' },
-        { type: TILE_TYPES.COIN, name: 'Coin', icon: '💰', color: '#ffaa00' }
+        { type: TILE_TYPES.EMPTY, name: 'Empty', icon: '⬜' },
+        { type: TILE_TYPES.WALL, name: 'Wall', icon: '⬛' },
+        { type: TILE_TYPES.START, name: 'Start', icon: '🟢' },
+        { type: TILE_TYPES.GOAL, name: 'Goal', icon: '🟡' },
+        { type: TILE_TYPES.SWITCH, name: 'Switch', icon: '🔘' },
+        { type: TILE_TYPES.DOOR, name: 'Door', icon: '🚪' },
+        { type: TILE_TYPES.PORTAL, name: 'Portal', icon: '🌀' },
+        { type: TILE_TYPES.COIN, name: 'Coin', icon: '💰' }
     ];
 
     // Initialize or resize grids when dimensions change
@@ -71,7 +71,7 @@ const LevelEditor = () => {
     // Handle cell action (click or drag) - immutable update
     const handleCellAction = (row, col, side) => {
         const updateGrid = side === 'left' ? setGridLeft : setGridRight;
-        
+
         updateGrid(prev => {
             // Create a deep copy of the grid
             const newGrid = prev.map(r => [...r]);
@@ -240,9 +240,8 @@ const LevelEditor = () => {
                             onClick={() => setSelectedTool(tile.type)}
                             title={tile.name}
                         >
-                            <div 
-                                className="tool-preview" 
-                                style={{ backgroundColor: tile.color }}
+                            <div
+                                className={`tool-preview ${tile.type}`}
                             >
                                 <span className="tool-icon">{tile.icon}</span>
                             </div>
