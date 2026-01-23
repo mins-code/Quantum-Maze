@@ -333,18 +333,38 @@ const GameLevel = () => {
         );
     };
 
-    // Handle tile hover for scanner
+    // Handle tile hover for scanner with debounce
+    const hoverTimeoutRef = useRef(null);
+
     const handleTileHover = (data) => {
+        // Clear any pending timeout
+        if (hoverTimeoutRef.current) {
+            clearTimeout(hoverTimeoutRef.current);
+        }
+
         if (data === null) {
+            // Immediately clear on mouse leave
             setScannerData(null);
         } else {
-            const metadata = TILE_METADATA[data.type];
-            setScannerData({
-                ...data,
-                ...metadata
-            });
+            // Small debounce to prevent rapid updates
+            hoverTimeoutRef.current = setTimeout(() => {
+                const metadata = TILE_METADATA[data.type];
+                setScannerData({
+                    ...data,
+                    ...metadata
+                });
+            }, 50); // 50ms debounce
         }
     };
+
+    // Cleanup timeout on unmount
+    useEffect(() => {
+        return () => {
+            if (hoverTimeoutRef.current) {
+                clearTimeout(hoverTimeoutRef.current);
+            }
+        };
+    }, []);
 
     if (loading) {
         return (
