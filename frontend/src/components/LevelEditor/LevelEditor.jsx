@@ -61,8 +61,8 @@ const LevelEditor = () => {
             setLoading(true);
             const token = localStorage.getItem('token');
             const endpoint = isBuiltin 
-                ? `http://localhost:5000/api/levels/${levelId}`
-                : `http://localhost:5000/api/custom-levels/${levelId}`;
+                ? `http://localhost:5001/api/levels/${levelId}`
+                : `http://localhost:5001/api/custom-levels/${levelId}`;
 
             const response = await fetch(endpoint, {
                 headers: { 'Authorization': `Bearer ${token}` }
@@ -153,13 +153,13 @@ const LevelEditor = () => {
 
             if (builtinId) {
                 // Update Built-in Level
-                url = `http://localhost:5000/api/levels/${builtinId}`;
+                url = `http://localhost:5001/api/levels/${builtinId}`;
                 method = 'PUT';
             } else {
                 // Custom Level (Create/Update)
                 url = id 
-                    ? `http://localhost:5000/api/custom-levels/${id}`
-                    : 'http://localhost:5000/api/custom-levels';
+                    ? `http://localhost:5001/api/custom-levels/${id}`
+                    : `http://localhost:5001/api/custom-levels`;
                 method = id ? 'PUT' : 'POST';
             }
 
