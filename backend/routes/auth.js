@@ -137,6 +137,12 @@ router.post('/login', async (req, res) => {
     }
 });
 
+// Helper to get rank
+async function getUserRank(userId, totalScore) {
+    const betterPlayers = await User.countDocuments({ totalScore: { $gt: totalScore } });
+    return betterPlayers + 1;
+}
+
 /**
  * @route   GET /api/auth/profile
  * @desc    Get current user profile
@@ -145,9 +151,12 @@ router.post('/login', async (req, res) => {
 router.get('/profile', protect, async (req, res) => {
     try {
         // req.user is set by protect middleware
+        const userProfile = req.user.getPublicProfile();
+        userProfile.rank = await getUserRank(req.user._id, req.user.totalScore);
+
         res.status(200).json({
             success: true,
-            user: req.user.getPublicProfile()
+            user: userProfile
         });
     } catch (error) {
         console.error('Get profile error:', error);
@@ -165,7 +174,7 @@ router.get('/profile', protect, async (req, res) => {
  */
 router.put('/profile', protect, async (req, res) => {
     try {
-        const { name, avatar } = req.body;
+        const { name, avatar, bio } = req.body;
 
         const user = await User.findById(req.user._id);
 
@@ -179,13 +188,17 @@ router.put('/profile', protect, async (req, res) => {
         // Update allowed fields
         if (name) user.name = name;
         if (avatar) user.avatar = avatar;
+        if (bio !== undefined) user.bio = bio;
 
         await user.save();
+
+        const userProfile = user.getPublicProfile();
+        userProfile.rank = await getUserRank(user._id, user.totalScore);
 
         res.status(200).json({
             success: true,
             message: 'Profile updated successfully',
-            user: user.getPublicProfile()
+            user: userProfile
         });
     } catch (error) {
         console.error('Update profile error:', error);
@@ -203,10 +216,13 @@ router.put('/profile', protect, async (req, res) => {
  */
 router.get('/verify', protect, async (req, res) => {
     try {
+        const userProfile = req.user.getPublicProfile();
+        userProfile.rank = await getUserRank(req.user._id, req.user.totalScore);
+
         res.status(200).json({
             success: true,
             message: 'Token is valid',
-            user: req.user.getPublicProfile()
+            user: userProfile
         });
     } catch (error) {
         console.error('Verify token error:', error);

@@ -90,6 +90,22 @@ router.post('/complete/:levelId', protect, async (req, res) => {
         // Save progress
         await progress.save();
 
+        // Sync stats to User model
+        await req.user.save(); // req.user is available via protect middleware but might be stale
+
+        // Better to fetch and update explicitly or use User.findByIdAndUpdate
+        await require('../models/User').findByIdAndUpdate(req.user._id, {
+            totalStars: progress.totalStars,
+            levelsCompleted: progress.completedLevels.length,
+            // Calculate pseudo-score: 1000 for 3 stars, 600 for 2, 300 for 1
+            totalScore: progress.completedLevels.reduce((acc, lvl) => {
+                if (lvl.stars === 3) return acc + 1000;
+                if (lvl.stars === 2) return acc + 600;
+                if (lvl.stars === 1) return acc + 300;
+                return acc + 100;
+            }, 0)
+        });
+
         res.status(200).json({
             success: true,
             message: 'Level completed successfully!',

@@ -6,6 +6,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../../utils/api';
+import Avatar from '../Shared/Avatar';
 import './Leaderboard.css';
 
 const Leaderboard = () => {
@@ -175,13 +176,10 @@ const Leaderboard = () => {
                                         </td>
                                         <td className="player-col">
                                             <div className="player-info">
-                                                <img
-                                                    src={getAvatarUrl(entry.avatar)}
-                                                    alt={entry.username}
+                                                <Avatar
+                                                    seed={entry.avatar}
+                                                    size="sm"
                                                     className="player-avatar"
-                                                    onError={(e) => {
-                                                        e.target.src = '/default-avatar.png';
-                                                    }}
                                                 />
                                                 <span className="player-name">{entry.username}</span>
                                             </div>
