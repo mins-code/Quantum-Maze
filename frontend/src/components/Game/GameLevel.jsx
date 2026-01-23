@@ -14,6 +14,7 @@ import { KEY_TO_DIRECTION } from '../../gameEngine/gameConstants';
 import api, { submitScore, fetchBestReplay } from '../../utils/api';
 import Legend from './Legend';
 import AudioManager from '../../utils/AudioManager';
+import confetti from 'canvas-confetti';
 import './GameLevel.css';
 
 const GameLevel = () => {
@@ -49,6 +50,7 @@ const GameLevel = () => {
     const [showVictoryModal, setShowVictoryModal] = useState(false);
     const [levelData, setLevelData] = useState(null);
     const [ghostPos, setGhostPos] = useState(null);
+    const [isShaking, setIsShaking] = useState(false);
 
     // Fetch and initialize level
     useEffect(() => {
@@ -193,6 +195,14 @@ const GameLevel = () => {
         }
     };
 
+    const triggerWinConfetti = () => {
+        confetti({
+            particleCount: 150,
+            spread: 70,
+            origin: { y: 0.6 }
+        });
+    };
+
     const handleMove = (direction) => {
         const result = engineRef.current.handleInput(direction);
 
@@ -212,6 +222,12 @@ const GameLevel = () => {
             setGhostPos(newGhostPos);
 
             if (result.hasWon) {
+                // Trigger victory confetti
+                triggerWinConfetti();
+
+                // Fire again for longer effect
+                setTimeout(() => triggerWinConfetti(), 400);
+
                 // Save level completion to backend
                 const currentStats = engineRef.current.getStats();
                 saveLevelCompletion(currentStats.moveCount, currentStats.elapsedTime);
@@ -220,6 +236,10 @@ const GameLevel = () => {
                 setMessage('');
             }
         } else {
+            // Trigger screen shake effect on collision
+            setIsShaking(true);
+            setTimeout(() => setIsShaking(false), 300);
+
             setMessage(`❌ ${result.reason} - Both players must move!`);
             setTimeout(() => setMessage(''), 2000);
         }
@@ -400,6 +420,7 @@ const GameLevel = () => {
                     mechanics={levelData?.mechanics}
                     activeSwitches={stats.activeSwitches}
                     ghostPos={ghostPos?.left}
+                    isShaking={isShaking}
                 />
 
                 <div className="boards-divider">
@@ -418,6 +439,7 @@ const GameLevel = () => {
                     mechanics={levelData?.mechanics}
                     activeSwitches={stats.activeSwitches}
                     ghostPos={ghostPos?.right}
+                    isShaking={isShaking}
                 />
             </div>
 

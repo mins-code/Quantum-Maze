@@ -20,7 +20,8 @@ const MazeBoard = ({
     ghostPos = null,
     isEditor = false,
     onTileClick = null,
-    onTileEnter = null
+    onTileEnter = null,
+    isShaking = false
 }) => {
     const [isMuted, setIsMuted] = useState(false);
 
@@ -85,7 +86,7 @@ const MazeBoard = ({
     };
 
     return (
-        <div className="maze-board-container">
+        <div className={`maze-board-container ${isShaking ? 'board-shake' : ''}`}>
             {/* Board Title */}
             <div className="maze-board-header">
                 <h3 className="maze-board-title">{title}</h3>

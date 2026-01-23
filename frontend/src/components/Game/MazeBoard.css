@@ -95,6 +95,7 @@
 }
 
 @keyframes dotPulse {
+
   0%,
   100% {
     opacity: 1;
@@ -103,6 +104,34 @@
   50% {
     opacity: 0.5;
   }
+}
+
+/* Screen Shake Animation */
+@keyframes shake {
+
+  0%,
+  100% {
+    transform: translate(0, 0);
+  }
+
+  10%,
+  30%,
+  50%,
+  70%,
+  90% {
+    transform: translate(-5px, 0);
+  }
+
+  20%,
+  40%,
+  60%,
+  80% {
+    transform: translate(5px, 0);
+  }
+}
+
+.board-shake {
+  animation: shake 0.3s cubic-bezier(.36, .07, .19, .97) both;
 }
 
 .maze-board-grid {
