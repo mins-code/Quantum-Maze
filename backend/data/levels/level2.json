@@ -1,0 +1,284 @@
+{
+    "levelId": 2,
+    "name": "Quantum Entanglement",
+    "difficulty": "Medium",
+    "description": "Double Sync. Two pairs of switches and doors. Work together to snake through the maze.",
+    "gridLeft": [
+        [
+            3,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1
+        ],
+        [
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            4,
+            1
+        ],
+        [
+            1,
+            4,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1
+        ],
+        [
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            0,
+            1
+        ],
+        [
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1
+        ],
+        [
+            1,
+            5,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1
+        ],
+        [
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1
+        ],
+        [
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            5,
+            1
+        ],
+        [
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            2,
+            1
+        ]
+    ],
+    "gridRight": [
+        [
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            3
+        ],
+        [
+            1,
+            4,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1
+        ],
+        [
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            4,
+            1
+        ],
+        [
+            1,
+            0,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1
+        ],
+        [
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1
+        ],
+        [
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            5,
+            1
+        ],
+        [
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1
+        ],
+        [
+            1,
+            5,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1
+        ],
+        [
+            1,
+            2,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1
+        ]
+    ],
+    "mechanics": {
+        "switches": [
+            {
+                "id": "sw_L_Cyan",
+                "pos": {
+                    "row": 2,
+                    "col": 1
+                },
+                "variant": 1
+            },
+            {
+                "id": "sw_L_Gold",
+                "pos": {
+                    "row": 1,
+                    "col": 7
+                },
+                "variant": 0
+            },
+            {
+                "id": "sw_R_Cyan",
+                "pos": {
+                    "row": 2,
+                    "col": 7
+                },
+                "variant": 1
+            },
+            {
+                "id": "sw_R_Gold",
+                "pos": {
+                    "row": 1,
+                    "col": 1
+                },
+                "variant": 0
+            }
+        ],
+        "doors": [
+            {
+                "id": "dr_L_Gold",
+                "pos": {
+                    "row": 7,
+                    "col": 7
+                },
+                "switchId": "sw_R_Gold"
+            },
+            {
+                "id": "dr_L_Cyan",
+                "pos": {
+                    "row": 5,
+                    "col": 1
+                },
+                "switchId": "sw_R_Cyan"
+            },
+            {
+                "id": "dr_R_Gold",
+                "pos": {
+                    "row": 7,
+                    "col": 1
+                },
+                "switchId": "sw_L_Gold"
+            },
+            {
+                "id": "dr_R_Cyan",
+                "pos": {
+                    "row": 5,
+                    "col": 7
+                },
+                "switchId": "sw_L_Cyan"
+            }
+        ],
+        "portals": []
+    },
+    "parMoves": 42,
+    "unlockRequirement": 1,
+    "stars": 0,
+    "isUnlocked": false,
+    "isCompleted": false
+}

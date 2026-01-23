@@ -1,0 +1,381 @@
+/**
+ * Tile Styles - Cyberpunk Theme
+ */
+
+.tile {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    min-width: 40px;
+    min-height: 40px;
+    aspect-ratio: 1;
+    border: 1px solid rgba(0, 243, 255, 0.2);
+    transition: all 0.2s ease;
+    overflow: hidden;
+}
+
+/* Empty Tile */
+.tile-empty {
+    background: rgba(11, 13, 23, 0.6);
+    border-color: rgba(0, 243, 255, 0.15);
+}
+
+.tile-empty:hover {
+    background: rgba(11, 13, 23, 0.8);
+    border-color: rgba(0, 243, 255, 0.3);
+}
+
+/* Wall Tile */
+.tile-wall {
+    background: linear-gradient(135deg,
+            rgba(0, 243, 255, 0.15) 0%,
+            rgba(0, 102, 255, 0.1) 100%);
+    border: 2px solid var(--neon-cyan);
+    box-shadow:
+        inset 0 0 10px rgba(0, 243, 255, 0.3),
+        0 0 5px rgba(0, 243, 255, 0.2);
+}
+
+.tile-wall::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: repeating-linear-gradient(45deg,
+            transparent,
+            transparent 10px,
+            rgba(0, 243, 255, 0.05) 10px,
+            rgba(0, 243, 255, 0.05) 20px);
+}
+
+/* Goal Tile */
+.tile-goal {
+    background: radial-gradient(circle at center,
+            rgba(0, 255, 136, 0.2) 0%,
+            rgba(0, 255, 136, 0.05) 50%,
+            transparent 100%);
+    border-color: var(--success);
+    animation: goalPulse 2s ease-in-out infinite;
+}
+
+@keyframes goalPulse {
+
+    0%,
+    100% {
+        box-shadow: 0 0 10px rgba(0, 255, 136, 0.3);
+    }
+
+    50% {
+        box-shadow: 0 0 20px rgba(0, 255, 136, 0.6);
+    }
+}
+
+/* Start Tile */
+.tile-start {
+    background: radial-gradient(circle at center,
+            rgba(188, 19, 254, 0.2) 0%,
+            rgba(188, 19, 254, 0.05) 50%,
+            transparent 100%);
+    border-color: var(--neon-purple);
+}
+
+/* Switch Tile Variants */
+.tile-switch.variant-0 {
+    --switch-color: #ffd700;
+}
+
+/* Gold */
+.tile-switch.variant-1 {
+    --switch-color: #00f3ff;
+}
+
+/* Cyan */
+.tile-switch.variant-2 {
+    --switch-color: #ff0055;
+}
+
+/* Pink */
+
+.tile-switch {
+    background: rgba(255, 215, 0, 0.1);
+    border-color: var(--switch-color);
+}
+
+.tile-switch.active {
+    background: rgba(255, 215, 0, 0.3);
+    box-shadow: inset 0 0 15px var(--switch-color);
+}
+
+.switch-indicator {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 60%;
+    height: 60%;
+    border-radius: 5px;
+    background: #000;
+    border: 2px solid var(--switch-color);
+    transition: all 0.3s ease;
+}
+
+.tile-switch.active .switch-indicator {
+    background: var(--switch-color);
+    box-shadow: 0 0 10px var(--switch-color);
+}
+
+/* Door Tile Variants */
+.tile-door.variant-0 {
+    --door-color: #ffd700;
+}
+
+/* Gold Link */
+.tile-door.variant-1 {
+    --door-color: #00f3ff;
+}
+
+/* Cyan Link */
+.tile-door.variant-2 {
+    --door-color: #ff0055;
+}
+
+/* Pink Link */
+
+.tile-door {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: var(--door-color);
+    transition: all 0.5s ease;
+}
+
+.tile-door.open {
+    border-color: var(--success);
+    opacity: 0.5;
+}
+
+.door-barrier {
+    position: absolute;
+    top: 10%;
+    bottom: 10%;
+    left: 50%;
+    width: 4px;
+    background: var(--door-color);
+    transform: translateX(-50%);
+    box-shadow: 0 0 10px var(--door-color);
+    transition: all 0.5s ease;
+}
+
+.tile-door.open .door-barrier {
+    height: 0;
+    opacity: 0;
+}
+
+/* Portal Tile */
+.tile-portal {
+    background: radial-gradient(circle, rgba(0, 243, 255, 0.2), transparent);
+    border-color: var(--neon-cyan);
+}
+
+.portal-vortex {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 70%;
+    height: 70%;
+    border-radius: 50%;
+    border: 2px dashed var(--neon-cyan);
+    animation: portalSpin 4s linear infinite;
+}
+
+.portal-core {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 30%;
+    height: 30%;
+    background: var(--neon-cyan);
+    border-radius: 50%;
+    box-shadow: 0 0 15px var(--neon-cyan);
+}
+
+@keyframes portalSpin {
+    from {
+        transform: translate(-50%, -50%) rotate(0deg);
+    }
+
+    to {
+        transform: translate(-50%, -50%) rotate(360deg);
+    }
+}
+
+/* Player Indicator */
+.tile-player {
+    z-index: 10;
+}
+
+.player-indicator {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 75%;
+    height: 75%;
+}
+
+.player-core {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 65%;
+    height: 65%;
+    background: var(--neon-purple);
+    border-radius: 50%;
+    box-shadow:
+        0 0 10px var(--neon-purple),
+        0 0 20px var(--neon-purple),
+        inset 0 0 10px rgba(255, 255, 255, 0.3);
+    animation: playerPulse 1.5s ease-in-out infinite;
+}
+
+.player-glow {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle at center,
+            rgba(188, 19, 254, 0.4) 0%,
+            rgba(188, 19, 254, 0.2) 40%,
+            transparent 70%);
+    border-radius: 50%;
+    animation: glowPulse 1.5s ease-in-out infinite;
+}
+
+@keyframes playerPulse {
+
+    0%,
+    100% {
+        transform: translate(-50%, -50%) scale(1);
+    }
+
+    50% {
+        transform: translate(-50%, -50%) scale(1.1);
+    }
+}
+
+@keyframes glowPulse {
+
+    0%,
+    100% {
+        opacity: 0.6;
+    }
+
+    50% {
+        opacity: 1;
+    }
+}
+
+/* Left Player - Purple */
+.player-left .player-core {
+    background: var(--neon-purple);
+    box-shadow:
+        0 0 10px var(--neon-purple),
+        0 0 20px var(--neon-purple);
+}
+
+.player-left .player-glow {
+    background: radial-gradient(circle at center,
+            rgba(188, 19, 254, 0.4) 0%,
+            rgba(188, 19, 254, 0.2) 40%,
+            transparent 70%);
+}
+
+/* Right Player - Cyan */
+.player-right .player-core {
+    background: var(--neon-cyan);
+    box-shadow:
+        0 0 10px var(--neon-cyan),
+        0 0 20px var(--neon-cyan);
+}
+
+.player-right .player-glow {
+    background: radial-gradient(circle at center,
+            rgba(0, 243, 255, 0.4) 0%,
+            rgba(0, 243, 255, 0.2) 40%,
+            transparent 70%);
+}
+
+/* Goal Indicator */
+.goal-indicator {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 50%;
+    height: 50%;
+}
+
+.goal-core {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 40%;
+    height: 40%;
+    background: var(--success);
+    border-radius: 50%;
+    box-shadow:
+        0 0 10px var(--success),
+        inset 0 0 5px rgba(255, 255, 255, 0.5);
+}
+
+.goal-pulse {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;
+    height: 100%;
+    border: 2px solid var(--success);
+    border-radius: 50%;
+    animation: goalRingPulse 2s ease-out infinite;
+}
+
+@keyframes goalRingPulse {
+    0% {
+        transform: translate(-50%, -50%) scale(0.5);
+        opacity: 1;
+    }
+
+    100% {
+        transform: translate(-50%, -50%) scale(1.5);
+        opacity: 0;
+    }
+}
+
+/* Ghost Effect */
+.tile-ghost {
+    opacity: 0.5;
+}
+
+.tile-ghost .player-indicator {
+    opacity: 0.6;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .tile {
+        min-width: 35px;
+        min-height: 35px;
+        border-width: 1px;
+    }
+
+    .tile-wall {
+        border-width: 1px;
+    }
+}

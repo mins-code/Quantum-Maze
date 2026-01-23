@@ -1,0 +1,178 @@
+{
+    "levelId": 1,
+    "name": "The Awakening",
+    "difficulty": "Easy",
+    "description": "Cooperation is key. Switches in one maze open doors in the other.",
+    "gridLeft": [
+        [
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1
+        ],
+        [
+            1,
+            3,
+            0,
+            0,
+            0,
+            4,
+            1
+        ],
+        [
+            1,
+            0,
+            1,
+            5,
+            1,
+            0,
+            1
+        ],
+        [
+            1,
+            0,
+            1,
+            0,
+            1,
+            0,
+            1
+        ],
+        [
+            1,
+            0,
+            1,
+            0,
+            1,
+            0,
+            1
+        ],
+        [
+            1,
+            0,
+            0,
+            0,
+            0,
+            2,
+            1
+        ],
+        [
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1
+        ]
+    ],
+    "gridRight": [
+        [
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1
+        ],
+        [
+            1,
+            4,
+            0,
+            0,
+            0,
+            3,
+            1
+        ],
+        [
+            1,
+            0,
+            1,
+            5,
+            1,
+            0,
+            1
+        ],
+        [
+            1,
+            0,
+            1,
+            0,
+            1,
+            0,
+            1
+        ],
+        [
+            1,
+            0,
+            1,
+            0,
+            1,
+            0,
+            1
+        ],
+        [
+            1,
+            2,
+            0,
+            0,
+            0,
+            0,
+            1
+        ],
+        [
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1
+        ]
+    ],
+    "mechanics": {
+        "switches": [
+            {
+                "id": "sw_left",
+                "pos": {
+                    "row": 1,
+                    "col": 5
+                }
+            },
+            {
+                "id": "sw_right",
+                "pos": {
+                    "row": 1,
+                    "col": 1
+                }
+            }
+        ],
+        "doors": [
+            {
+                "id": "dr_left",
+                "pos": {
+                    "row": 2,
+                    "col": 3
+                },
+                "switchId": "sw_right"
+            },
+            {
+                "id": "dr_right",
+                "pos": {
+                    "row": 2,
+                    "col": 3
+                },
+                "switchId": "sw_left"
+            }
+        ],
+        "portals": []
+    },
+    "parMoves": 15,
+    "unlockRequirement": 0,
+    "stars": 0,
+    "isUnlocked": true,
+    "isCompleted": false
+}
