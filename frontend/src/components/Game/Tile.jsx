@@ -66,6 +66,13 @@ const Tile = ({ type, isPlayer, isGhost, playerSide, isActive, isOpen, variant =
                 </div>
             )}
 
+            {isGhost && !isPlayer && (
+                <div className="ghost-indicator">
+                    <div className="ghost-core"></div>
+                    <div className="ghost-glow"></div>
+                </div>
+            )}
+
             {type === 2 && !isPlayer && (
                 <div className="goal-indicator">
                     <div className="goal-core"></div>

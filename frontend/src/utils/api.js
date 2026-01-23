@@ -57,4 +57,44 @@ api.interceptors.response.use(
     }
 );
 
+// ==================== GAME API FUNCTIONS ====================
+
+/**
+ * Submit score with replay history
+ * @param {number} levelId - Level ID
+ * @param {number} moves - Number of moves
+ * @param {number} timeTaken - Time taken in seconds
+ * @param {Array} history - Replay history array
+ * @returns {Promise} - API response
+ */
+export const submitScore = async (levelId, moves, timeTaken, history = []) => {
+    try {
+        const response = await api.post('/game/score', {
+            levelId,
+            moves,
+            timeTaken,
+            replayHistory: history
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Error submitting score:', error);
+        throw error;
+    }
+};
+
+/**
+ * Fetch best replay for a level
+ * @param {number} levelId - Level ID
+ * @returns {Promise<Array>} - Replay history array
+ */
+export const fetchBestReplay = async (levelId) => {
+    try {
+        const response = await api.get(`/game/replay/${levelId}`);
+        return response.data.replayHistory;
+    } catch (error) {
+        console.error('Error fetching replay:', error);
+        return null;
+    }
+};
+
 export default api;

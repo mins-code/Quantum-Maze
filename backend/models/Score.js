@@ -48,6 +48,11 @@ const scoreSchema = new mongoose.Schema({
         default: 0,
         min: [0, 'Hints used cannot be negative']
     },
+    // Replay data for ghost system
+    replayHistory: {
+        type: [Object],
+        default: []
+    },
     completedAt: {
         type: Date,
         default: Date.now

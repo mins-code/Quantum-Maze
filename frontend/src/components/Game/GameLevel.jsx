@@ -11,7 +11,7 @@ import MazeBoard from './MazeBoard';
 import VictoryModal from './VictoryModal';
 import QuantumEngine from '../../gameEngine/QuantumEngine';
 import { KEY_TO_DIRECTION } from '../../gameEngine/gameConstants';
-import api from '../../utils/api';
+import api, { submitScore, fetchBestReplay } from '../../utils/api';
 import Legend from './Legend';
 import AudioManager from '../../utils/AudioManager';
 import './GameLevel.css';
@@ -46,6 +46,7 @@ const GameLevel = () => {
     const [error, setError] = useState('');
     const [showVictoryModal, setShowVictoryModal] = useState(false);
     const [levelData, setLevelData] = useState(null);
+    const [ghostPos, setGhostPos] = useState(null);
 
     // Fetch and initialize level
     useEffect(() => {
@@ -85,6 +86,18 @@ const GameLevel = () => {
                     // Load and play audio tracks
                     AudioManager.load('/music/cyber_ambience.mp3', '/music/cyber_beat.mp3');
                     AudioManager.play();
+
+                    // Load ghost replay data
+                    const replayData = await fetchBestReplay(id);
+                    if (replayData && replayData.length > 0) {
+                        engineRef.current.loadGhostReplay(replayData);
+                        // Set initial ghost position
+                        const initialGhostPos = engineRef.current.getGhostPositions(0);
+                        setGhostPos(initialGhostPos);
+                        console.log('Ghost replay loaded for level', id);
+                    } else {
+                        setGhostPos(null);
+                    }
                 } else {
                     setError('Failed to load level');
                 }
@@ -133,6 +146,14 @@ const GameLevel = () => {
 
     const saveLevelCompletion = async (moves, time) => {
         try {
+            // Export replay history from engine
+            const replayHistory = engineRef.current.exportHistory();
+
+            // Submit score with replay data
+            const scoreResponse = await submitScore(parseInt(id), moves, time, replayHistory);
+            console.log('Score submitted:', scoreResponse);
+
+            // Also save to progress endpoint
             const response = await api.post(`/progress/complete/${id}`, {
                 moves,
                 time
@@ -161,6 +182,10 @@ const GameLevel = () => {
 
             updateStats();
 
+            // Update ghost position based on current move count
+            const newGhostPos = engineRef.current.getGhostPositions(result.moveCount);
+            setGhostPos(newGhostPos);
+
             if (result.hasWon) {
                 // Save level completion to backend
                 const currentStats = engineRef.current.getStats();
@@ -187,6 +212,11 @@ const GameLevel = () => {
                 gameStarted: true
             });
             updateStats();
+
+            // Update ghost position after undo
+            const newGhostPos = engineRef.current.getGhostPositions(result.moveCount);
+            setGhostPos(newGhostPos);
+
             setMessage('⏪ Move undone');
             setTimeout(() => setMessage(''), 1500);
         }
@@ -205,6 +235,11 @@ const GameLevel = () => {
 
         updateStats();
         setShowVictoryModal(false);
+
+        // Reset ghost position to start
+        const initialGhostPos = engineRef.current.getGhostPositions(0);
+        setGhostPos(initialGhostPos);
+
         setMessage('🔄 Level reset');
         setTimeout(() => setMessage(''), 1500);
     };
@@ -330,6 +365,7 @@ const GameLevel = () => {
                     title="Left Maze"
                     mechanics={levelData?.mechanics}
                     activeSwitches={stats.activeSwitches}
+                    ghostPos={ghostPos?.left}
                 />
 
                 <div className="boards-divider">
@@ -347,6 +383,7 @@ const GameLevel = () => {
                     title="Right Maze"
                     mechanics={levelData?.mechanics}
                     activeSwitches={stats.activeSwitches}
+                    ghostPos={ghostPos?.right}
                 />
             </div>
 

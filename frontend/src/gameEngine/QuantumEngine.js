@@ -67,6 +67,9 @@ export class QuantumEngine {
         this.moveHistory = new LinkedList();
         this.pathfindingGraph = new MazeGraph();
 
+        // Ghost replay system
+        this.ghostHistory = [];
+
         // Game state
         this.currentLevel = null;
         this.gameState = GAME_STATES.IDLE;
@@ -742,6 +745,108 @@ export class QuantumEngine {
         if (rowDiff > 0) return 'DOWN';
         if (colDiff < 0) return 'LEFT';
         if (colDiff > 0) return 'RIGHT';
+
+        return null;
+    }
+
+    // ==================== GHOST REPLAY SYSTEM ====================
+
+    /**
+     * Load ghost replay data from a history array
+     * @param {Array} historyArray - Array of move objects with player positions
+     * @returns {boolean} - True if loaded successfully
+     */
+    loadGhostReplay(historyArray) {
+        // Validate input
+        if (!Array.isArray(historyArray)) {
+            console.warn('Ghost replay data must be an array');
+            this.ghostHistory = [];
+            return false;
+        }
+
+        // Assign the history
+        this.ghostHistory = historyArray;
+        console.log(`Ghost replay loaded: ${historyArray.length} moves`);
+        return true;
+    }
+
+    /**
+     * Export move history as a clean array for database storage
+     * Traverses the moveHistory LinkedList and extracts player positions
+     * @returns {Array} - Array of move objects with player positions
+     */
+    exportHistory() {
+        const historyArray = [];
+
+        // Add initial positions (move 0)
+        const startPositions = {
+            moveNumber: 0,
+            left: { row: this.leftPlayer.row, col: this.leftPlayer.col },
+            right: { row: this.rightPlayer.row, col: this.rightPlayer.col }
+        };
+        
+        // If we have move history, use the initial positions from first move
+        const firstMove = this.moveHistory.getFirst();
+        if (firstMove) {
+            startPositions.left = { row: firstMove.leftFrom.row, col: firstMove.leftFrom.col };
+            startPositions.right = { row: firstMove.rightFrom.row, col: firstMove.rightFrom.col };
+        }
+        
+        historyArray.push(startPositions);
+
+        // Traverse the linked list and extract positions
+        this.moveHistory.forEach((moveData) => {
+            historyArray.push({
+                moveNumber: moveData.moveNumber,
+                left: { row: moveData.leftTo.row, col: moveData.leftTo.col },
+                right: { row: moveData.rightTo.row, col: moveData.rightTo.col }
+            });
+        });
+
+        return historyArray;
+    }
+
+    /**
+     * Get ghost positions for a specific move count
+     * Core logic for ghost replay visualization
+     * @param {number} currentMoveCount - Current player move count
+     * @returns {Object|null} - Object with left and right positions, or null if no ghost
+     */
+    getGhostPositions(currentMoveCount) {
+        // No ghost data loaded
+        if (!this.ghostHistory || this.ghostHistory.length === 0) {
+            return null;
+        }
+
+        // Move count is 0 - return start positions
+        if (currentMoveCount === 0) {
+            const startMove = this.ghostHistory[0];
+            if (startMove) {
+                return {
+                    left: { row: startMove.left.row, col: startMove.left.col },
+                    right: { row: startMove.right.row, col: startMove.right.col }
+                };
+            }
+            return null;
+        }
+
+        // Move count exceeds history - ghost stays at final position (goal)
+        if (currentMoveCount >= this.ghostHistory.length) {
+            const finalMove = this.ghostHistory[this.ghostHistory.length - 1];
+            return {
+                left: { row: finalMove.left.row, col: finalMove.left.col },
+                right: { row: finalMove.right.row, col: finalMove.right.col }
+            };
+        }
+
+        // Return position at the current move count
+        const moveData = this.ghostHistory[currentMoveCount];
+        if (moveData) {
+            return {
+                left: { row: moveData.left.row, col: moveData.left.col },
+                right: { row: moveData.right.row, col: moveData.right.col }
+            };
+        }
 
         return null;
     }

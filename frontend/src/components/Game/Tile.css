@@ -367,6 +367,72 @@
     opacity: 0.6;
 }
 
+/* Ghost Indicator - Semi-transparent replay ghost */
+.ghost-indicator {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 75%;
+    height: 75%;
+    z-index: 5;
+}
+
+.ghost-core {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 65%;
+    height: 65%;
+    background: rgba(255, 255, 255, 0.3);
+    border: 2px dashed rgba(255, 255, 255, 0.5);
+    border-radius: 50%;
+    box-shadow:
+        0 0 5px rgba(255, 255, 255, 0.3),
+        inset 0 0 5px rgba(255, 255, 255, 0.2);
+    animation: ghostPulse 2s ease-in-out infinite;
+}
+
+.ghost-glow {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle at center,
+            rgba(255, 255, 255, 0.2) 0%,
+            rgba(255, 255, 255, 0.1) 40%,
+            transparent 70%);
+    border-radius: 50%;
+    animation: ghostGlowPulse 2s ease-in-out infinite;
+}
+
+@keyframes ghostPulse {
+    0%,
+    100% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 0.4;
+    }
+
+    50% {
+        transform: translate(-50%, -50%) scale(1.05);
+        opacity: 0.6;
+    }
+}
+
+@keyframes ghostGlowPulse {
+    0%,
+    100% {
+        opacity: 0.3;
+    }
+
+    50% {
+        opacity: 0.5;
+    }
+}
+
 /* Responsive */
 @media (max-width: 768px) {
     .tile {

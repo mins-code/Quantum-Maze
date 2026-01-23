@@ -71,7 +71,7 @@ router.get('/levels/:levelId', async (req, res) => {
  */
 router.post('/score', protect, async (req, res) => {
     try {
-        const { levelId, moves, timeTaken, undoCount, hintsUsed } = req.body;
+        const { levelId, moves, timeTaken, undoCount, hintsUsed, replayHistory } = req.body;
 
         if (!levelId || moves === undefined || timeTaken === undefined) {
             return res.status(400).json({
@@ -99,15 +99,22 @@ router.post('/score', protect, async (req, res) => {
         if (!existingScore || stars > existingScore.stars ||
             (stars === existingScore.stars && timeTaken < existingScore.timeTaken)) {
 
-            const score = await Score.create({
-                userId: req.user._id,
-                levelId,
-                moves,
-                timeTaken,
-                stars,
-                undoCount: undoCount || 0,
-                hintsUsed: hintsUsed || 0
-            });
+            // Update or create best score
+            const score = await Score.findOneAndUpdate(
+                { userId: req.user._id, levelId },
+                {
+                    userId: req.user._id,
+                    levelId,
+                    moves,
+                    timeTaken,
+                    stars,
+                    undoCount: undoCount || 0,
+                    hintsUsed: hintsUsed || 0,
+                    replayHistory: replayHistory || [],
+                    completedAt: Date.now()
+                },
+                { new: true, upsert: true, setDefaultsOnInsert: true }
+            );
 
             return res.status(201).json({
                 success: true,
@@ -127,7 +134,8 @@ router.post('/score', protect, async (req, res) => {
         console.error('Submit score error:', error);
         res.status(500).json({
             success: false,
-            error: 'Server error submitting score'
+            error: error.message,
+            stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
         });
     }
 });
@@ -154,6 +162,46 @@ router.get('/progress', protect, async (req, res) => {
         res.status(500).json({
             success: false,
             error: 'Server error fetching progress'
+        });
+    }
+});
+
+/**
+ * @route   GET /api/game/replay/:levelId
+ * @desc    Get replay history for user's best score on a level
+ * @access  Private
+ */
+router.get('/replay/:levelId', protect, async (req, res) => {
+    try {
+        const levelId = parseInt(req.params.levelId);
+
+        if (!levelId || isNaN(levelId)) {
+            return res.status(400).json({
+                success: false,
+                error: 'Invalid level ID'
+            });
+        }
+
+        // Get user's best score for this level
+        const bestScore = await Score.getBestScore(req.user._id, levelId);
+
+        if (!bestScore) {
+            return res.status(200).json({
+                success: true,
+                replayHistory: null,
+                message: 'No score found for this level'
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            replayHistory: bestScore.replayHistory || []
+        });
+    } catch (error) {
+        console.error('Get replay error:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Server error fetching replay data'
         });
     }
 });

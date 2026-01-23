@@ -15,7 +15,8 @@ const MazeBoard = ({
     playerSide,
     title,
     mechanics,
-    activeSwitches = []
+    activeSwitches = [],
+    ghostPos = null
 }) => {
     const [isMuted, setIsMuted] = useState(false);
 
@@ -115,6 +116,11 @@ const MazeBoard = ({
                             playerPosition.row === rowIndex &&
                             playerPosition.col === colIndex;
 
+                        const isGhost =
+                            ghostPos &&
+                            ghostPos.row === rowIndex &&
+                            ghostPos.col === colIndex;
+
                         const mechanicProps = getMechanicProps(rowIndex, colIndex, tileType);
 
                         return (
@@ -126,6 +132,7 @@ const MazeBoard = ({
                                 isActive={mechanicProps.isActive}
                                 isOpen={mechanicProps.isOpen}
                                 variant={mechanicProps.variant}
+                                isGhost={isGhost}
                             />
                         );
                     })
