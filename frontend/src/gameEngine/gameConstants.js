@@ -13,7 +13,11 @@ export const TILE_TYPES = {
     SWITCH: 4,
     DOOR: 5,
     PORTAL: 6,
-    COIN: 7
+    COIN: 7,
+    ONE_WAY_UP: 9,
+    ONE_WAY_DOWN: 10,
+    ONE_WAY_LEFT: 11,
+    ONE_WAY_RIGHT: 12
 };
 
 // Individual tile type exports for convenience
@@ -25,6 +29,10 @@ export const SWITCH = TILE_TYPES.SWITCH;
 export const DOOR = TILE_TYPES.DOOR;
 export const PORTAL = TILE_TYPES.PORTAL;
 export const COIN = TILE_TYPES.COIN;
+export const ONE_WAY_UP = TILE_TYPES.ONE_WAY_UP;
+export const ONE_WAY_DOWN = TILE_TYPES.ONE_WAY_DOWN;
+export const ONE_WAY_LEFT = TILE_TYPES.ONE_WAY_LEFT;
+export const ONE_WAY_RIGHT = TILE_TYPES.ONE_WAY_RIGHT;
 
 // Tile Metadata - For Live Tile Preview Scanner
 export const TILE_METADATA = {
@@ -75,6 +83,30 @@ export const TILE_METADATA = {
         description: 'Collectible energy fragment. Bonus objective.',
         hazardLevel: 'COLLECTIBLE',
         color: '#ffd700'
+    },
+    [TILE_TYPES.ONE_WAY_UP]: {
+        name: 'North Gate',
+        description: 'One-way barrier. Only allows passage when moving UP.',
+        hazardLevel: 'RESTRICTION',
+        color: '#00ccff'
+    },
+    [TILE_TYPES.ONE_WAY_DOWN]: {
+        name: 'South Gate',
+        description: 'One-way barrier. Only allows passage when moving DOWN.',
+        hazardLevel: 'RESTRICTION',
+        color: '#00ccff'
+    },
+    [TILE_TYPES.ONE_WAY_LEFT]: {
+        name: 'West Gate',
+        description: 'One-way barrier. Only allows passage when moving LEFT.',
+        hazardLevel: 'RESTRICTION',
+        color: '#00ccff'
+    },
+    [TILE_TYPES.ONE_WAY_RIGHT]: {
+        name: 'East Gate',
+        description: 'One-way barrier. Only allows passage when moving RIGHT.',
+        hazardLevel: 'RESTRICTION',
+        color: '#00ccff'
     }
 };
 

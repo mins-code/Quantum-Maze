@@ -489,6 +489,38 @@
     display: none !important;
 }
 
+/* One-Way Door */
+.tile-oneway {
+    background: rgba(0, 204, 255, 0.05);
+    border: 1px solid rgba(0, 204, 255, 0.2);
+    box-shadow: inset 0 0 10px rgba(0, 204, 255, 0.1);
+}
+
+.arrow-gate {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    font-size: 24px;
+    color: #00ccff;
+    text-shadow: 0 0 8px rgba(0, 204, 255, 0.8);
+    animation: arrowPulse 1.5s ease-in-out infinite;
+    z-index: 2;
+    /* Transform handled inline for rotation */
+}
+
+@keyframes arrowPulse {
+    0%, 100% {
+        opacity: 0.6;
+        filter: drop-shadow(0 0 2px #00ccff);
+        font-size: 24px;
+    }
+    50% {
+        opacity: 1;
+        filter: drop-shadow(0 0 8px #00ccff);
+        font-size: 26px;
+    }
+}
+
 /* Responsive */
 @media (max-width: 768px) {
     .tile {
@@ -499,5 +531,14 @@
 
     .tile-wall {
         border-width: 1px;
+    }
+    
+    .arrow-gate {
+        font-size: 18px;
+    }
+    
+    @keyframes arrowPulse {
+        0%, 100% { font-size: 18px; }
+        50% { font-size: 20px; }
     }
 }
