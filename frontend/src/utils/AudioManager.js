@@ -55,46 +55,59 @@ class AudioManager {
      * Ensures tracks stay in sync
      */
     async play() {
-        if (this.isPlaying) {
-            console.warn('[AudioManager] Already playing');
+        // If we are already fully playing, just return true
+        if (this.isPlaying && !this.playPromise) {
             return true;
+        }
+
+        // If a play request is already in progress, join it
+        if (this.playPromise) {
+            console.log('[AudioManager] Joining existing play request');
+            return this.playPromise;
         }
 
         this.isPlaying = true;
 
-        try {
-            // Start both tracks at the same time to keep them in sync
-            await Promise.all([
-                this.baseTrack.play(),
-                this.intenseTrack.play()
-            ]);
+        // Create a new play promise that we can share
+        this.playPromise = (async () => {
+            try {
+                // Start both tracks at the same time to keep them in sync
+                await Promise.all([
+                    this.baseTrack.play(),
+                    this.intenseTrack.play()
+                ]);
 
-            // Check if we were stopped while waiting for the promise
-            if (!this.isPlaying) {
-                this.baseTrack.pause();
-                this.intenseTrack.pause();
-                this.baseTrack.currentTime = 0;
-                this.intenseTrack.currentTime = 0;
+                // Check if we were stopped while waiting for the promise
+                if (!this.isPlaying) {
+                    this.baseTrack.pause();
+                    this.intenseTrack.pause();
+                    this.baseTrack.currentTime = 0;
+                    this.intenseTrack.currentTime = 0;
+                    return false;
+                } else {
+                    console.log('[AudioManager] Playback started');
+                    return true;
+                }
+            } catch (error) {
+                const isAbort = error.name === 'AbortError';
+
+                // If the error is an abort/interrupt error from calling pause(), it's expected
+                if (!isAbort) {
+                    console.error('[AudioManager] Error starting playback:', error);
+                }
+                
+                // Only reset flag if it wasn't an abort error
+                if (!isAbort && this.isPlaying) {
+                    this.isPlaying = false;
+                }
                 return false;
-            } else {
-                console.log('[AudioManager] Playback started');
-                return true;
+            } finally {
+                // Clear the promise so future calls start fresh
+                this.playPromise = null;
             }
-        } catch (error) {
-            const isAbort = error.name === 'AbortError';
+        })();
 
-            // If the error is an abort/interrupt error from calling pause(), it's expected
-            if (!isAbort) {
-                console.error('[AudioManager] Error starting playback:', error);
-            }
-            
-            // Only reset flag if it wasn't an abort error (e.g. autoplay prevention, network error)
-            // Abort errors usually mean we were stopped/paused intentionally or superceded by a new request.
-            if (!isAbort && this.isPlaying) {
-                this.isPlaying = false;
-            }
-            return false;
-        }
+        return this.playPromise;
     }
 
     /**
