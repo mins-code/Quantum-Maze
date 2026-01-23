@@ -84,12 +84,19 @@ const Tile = ({ type, isPlayer, isGhost, playerSide, isActive, isOpen, variant =
         <div
             className={getTileClass()}
             onClick={onClick}
-            onMouseEnter={() => {
+            onMouseEnter={(e) => {
+                // Prevent any event bubbling that might trigger game logic
+                if (onHover) {
+                    e.stopPropagation();
+                }
                 if (onMouseEnter) onMouseEnter();
                 if (onHover) onHover();
             }}
-            onMouseLeave={() => {
-                if (onHover) onHover(null);
+            onMouseLeave={(e) => {
+                if (onHover) {
+                    e.stopPropagation();
+                    onHover(null);
+                }
             }}
         >
             {isPlayer && (
