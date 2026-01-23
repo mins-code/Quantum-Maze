@@ -57,6 +57,7 @@ const gameRoutes = require('./routes/game');
 const leaderboardRoutes = require('./routes/leaderboard');
 const levelsRoutes = require('./routes/levels');
 const progressRoutes = require('./routes/progress');
+const customLevelsRoutes = require('./routes/customLevels');
 
 // Use routes
 app.use('/api/auth', authRoutes);
@@ -64,6 +65,7 @@ app.use('/api/game', gameRoutes);
 app.use('/api/leaderboard', leaderboardRoutes);
 app.use('/api/levels', levelsRoutes);
 app.use('/api/progress', progressRoutes);
+app.use('/api/custom-levels', customLevelsRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {

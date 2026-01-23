@@ -99,6 +99,13 @@ const Dashboard = () => {
             description: 'Game preferences',
             path: '/settings',
             gradient: 'linear-gradient(135deg, #00d4ff, var(--success))'
+        },
+        {
+            icon: '✏️',
+            title: 'Create Level',
+            description: 'Design your own levels',
+            path: '/editor',
+            gradient: 'linear-gradient(135deg, #FFD700, #FF8C00)'
         }
     ];
 

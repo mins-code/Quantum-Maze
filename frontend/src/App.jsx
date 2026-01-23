@@ -14,6 +14,7 @@ import GameLevel from './components/Game/GameLevel';
 import Leaderboard from './components/Leaderboard/Leaderboard';
 import Settings from './components/Settings/Settings';
 import EditProfile from './components/Profile/EditProfile';
+import LevelEditor from './components/LevelEditor/LevelEditor';
 import PrivateRoute from './components/Auth/PrivateRoute';
 
 function App() {
@@ -58,6 +59,15 @@ function App() {
             element={
               <PrivateRoute>
                 <Leaderboard />
+              </PrivateRoute>
+            }
+          />
+
+          <Route
+            path="/editor"
+            element={
+              <PrivateRoute>
+                <LevelEditor />
               </PrivateRoute>
             }
           />
