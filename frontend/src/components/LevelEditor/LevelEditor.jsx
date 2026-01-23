@@ -1,6 +1,6 @@
 /**
  * LevelEditor Component - Quantum Maze
- * Interactive level creator with dual grid editing and drag-painting
+ * Interactive level creator with dual grid editing
  */
 
 import React, { useState, useEffect } from 'react';
@@ -8,7 +8,12 @@ import MazeBoard from '../Game/MazeBoard';
 import { TILE_TYPES } from '../../gameEngine/gameConstants';
 import './LevelEditor.css';
 
+import { useNavigate, useParams } from 'react-router-dom';
+
 const LevelEditor = () => {
+    const { id } = useParams(); // Get level ID if editing
+    const navigate = useNavigate();
+
     // State management
     const [dimensions, setDimensions] = useState({ rows: 10, cols: 10 });
     const [gridLeft, setGridLeft] = useState([]);
@@ -17,7 +22,7 @@ const LevelEditor = () => {
     const [levelName, setLevelName] = useState('');
     const [difficulty, setDifficulty] = useState('Medium');
     const [parMoves, setParMoves] = useState(10);
-    const [isPainting, setIsPainting] = useState(false); // For drag-painting
+    const [loading, setLoading] = useState(false);
 
     // Tile metadata for comprehensive toolbox
     const TILE_METADATA = [
@@ -31,77 +36,101 @@ const LevelEditor = () => {
         { type: TILE_TYPES.COIN, name: 'Coin', icon: '💰' }
     ];
 
-    // Initialize or resize grids when dimensions change
+    // Initialize grids or fetch existing level
     useEffect(() => {
-        const createGrid = (oldGrid) => {
-            const newGrid = Array(dimensions.rows).fill(null).map((_, rowIndex) =>
-                Array(dimensions.cols).fill(null).map((_, colIndex) => {
-                    // Preserve existing data if possible
-                    if (oldGrid && oldGrid[rowIndex] && oldGrid[rowIndex][colIndex] !== undefined) {
-                        return oldGrid[rowIndex][colIndex];
-                    }
-                    return TILE_TYPES.EMPTY; // Default to EMPTY
-                })
-            );
-            return newGrid;
-        };
+        if (id) {
+            fetchLevelData(id);
+        } else {
+            // New level - initialize empty grids
+            initializeGrids(dimensions.rows, dimensions.cols);
+        }
+    }, [id]); // Only run on mount or ID change
 
-        setGridLeft(prev => createGrid(prev));
-        setGridRight(prev => createGrid(prev));
-    }, [dimensions]);
+    // Helper to initialize empty grids
+    const initializeGrids = (rows, cols) => {
+        const createGrid = () => Array(rows).fill(null).map(() => Array(cols).fill(TILE_TYPES.EMPTY));
+        setGridLeft(createGrid());
+        setGridRight(createGrid());
+    };
 
-    // Stop painting when mouse is released anywhere
-    useEffect(() => {
-        const handleMouseUp = () => setIsPainting(false);
-        window.addEventListener('mouseup', handleMouseUp);
-        return () => window.removeEventListener('mouseup', handleMouseUp);
-    }, []);
+    // Fetch existing level data
+    const fetchLevelData = async (levelId) => {
+        try {
+            setLoading(true);
+            const token = localStorage.getItem('token');
+            const response = await fetch(`http://localhost:5000/api/custom-levels/${levelId}`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const data = await response.json();
 
-    // Handle dimension changes
-    const handleDimensionChange = (dimension, value) => {
-        const numValue = parseInt(value);
-        if (numValue >= 5 && numValue <= 30) {
-            setDimensions(prev => ({
-                ...prev,
-                [dimension]: numValue
-            }));
+            if (response.ok) {
+                const { level } = data;
+                setLevelName(level.name);
+                setDifficulty(level.difficulty);
+                setParMoves(level.parMoves);
+
+                // Set dimensions based on loaded grid
+                if (level.gridLeft && level.gridLeft.length > 0) {
+                    const rows = level.gridLeft.length;
+                    const cols = level.gridLeft[0].length;
+                    setDimensions({ rows, cols });
+                    setGridLeft(level.gridLeft);
+                    setGridRight(level.gridRight);
+                }
+            } else {
+                alert(`Error loading level: ${data.message}`);
+                navigate('/dashboard');
+            }
+        } catch (error) {
+            console.error('Error fetching level:', error);
+            alert('Failed to load level');
+        } finally {
+            setLoading(false);
         }
     };
 
-    // Handle cell action (click or drag) - immutable update
-    const handleCellAction = (row, col, side) => {
+    // Handle dimension changes (resize logic)
+    const handleDimensionChange = (dimension, value) => {
+        const numValue = parseInt(value);
+        if (numValue >= 5 && numValue <= 30) {
+            const newDims = { ...dimensions, [dimension]: numValue };
+            setDimensions(newDims);
+
+            // Resize logic protecting existing data
+            const resizeGrid = (oldGrid) => {
+                return Array(newDims.rows).fill(null).map((_, r) =>
+                    Array(newDims.cols).fill(null).map((_, c) => {
+                        if (oldGrid && oldGrid[r] && oldGrid[r][c] !== undefined) {
+                            return oldGrid[r][c];
+                        }
+                        return TILE_TYPES.EMPTY;
+                    })
+                );
+            };
+
+            setGridLeft(prev => resizeGrid(prev));
+            setGridRight(prev => resizeGrid(prev));
+        }
+    };
+
+    // Handle tile click (single place)
+    const handleTileClick = (row, col, side) => {
         const updateGrid = side === 'left' ? setGridLeft : setGridRight;
 
         updateGrid(prev => {
-            // Create a deep copy of the grid
             const newGrid = prev.map(r => [...r]);
-            // Update the specific cell
             newGrid[row][col] = selectedTool;
             return newGrid;
         });
     };
 
-    // Handle mouse down on a cell (start painting)
-    const handleMouseDown = (row, col, side) => {
-        setIsPainting(true);
-        handleCellAction(row, col, side);
-    };
-
-    // Handle mouse enter on a cell (continue painting if mouse is down)
-    const handleMouseEnter = (row, col, side) => {
-        if (isPainting) {
-            handleCellAction(row, col, side);
-        }
-    };
-
-    // Save level to backend
+    // Save level (Create or Update)
     const handleSaveLevel = async () => {
         if (!levelName.trim()) {
             alert('Please enter a level name');
             return;
         }
 
-        // Validate that both grids have START and GOAL
         const hasStartLeft = gridLeft.some(row => row.includes(TILE_TYPES.START));
         const hasGoalLeft = gridLeft.some(row => row.includes(TILE_TYPES.GOAL));
         const hasStartRight = gridRight.some(row => row.includes(TILE_TYPES.START));
@@ -114,8 +143,14 @@ const LevelEditor = () => {
 
         try {
             const token = localStorage.getItem('token');
-            const response = await fetch('http://localhost:5000/api/custom-levels', {
-                method: 'POST',
+            const url = id
+                ? `http://localhost:5000/api/custom-levels/${id}`
+                : 'http://localhost:5000/api/custom-levels';
+
+            const method = id ? 'PUT' : 'POST';
+
+            const response = await fetch(url, {
+                method,
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
@@ -126,22 +161,21 @@ const LevelEditor = () => {
                     gridRight,
                     difficulty,
                     parMoves,
-                    mechanics: {
-                        switches: [],
-                        doors: [],
-                        portals: []
-                    }
+                    mechanics: { switches: [], doors: [], portals: [] }
                 })
             });
 
             const data = await response.json();
 
             if (response.ok) {
-                alert('Level saved successfully!');
-                // Reset form
-                setLevelName('');
-                setGridLeft(Array(dimensions.rows).fill(null).map(() => Array(dimensions.cols).fill(TILE_TYPES.EMPTY)));
-                setGridRight(Array(dimensions.rows).fill(null).map(() => Array(dimensions.cols).fill(TILE_TYPES.EMPTY)));
+                alert(`Level ${id ? 'updated' : 'saved'} successfully!`);
+                if (!id) {
+                    // Redirect to edit mode or clear form if creating new
+                    // logical choice: keep editing the newly created level or clear?
+                    // Let's clear for now to stay consistent with previous behavior
+                    setLevelName('');
+                    initializeGrids(dimensions.rows, dimensions.cols);
+                }
             } else {
                 alert(`Error: ${data.message || 'Failed to save level'}`);
             }
@@ -250,7 +284,7 @@ const LevelEditor = () => {
                     ))}
                 </div>
                 <div className="tool-hint">
-                    💡 Click to place, or click and drag to paint multiple tiles
+                    💡 Click on a tile to place the selected element. (Click-only mode)
                 </div>
             </div>
 
@@ -262,8 +296,7 @@ const LevelEditor = () => {
                         title="Left Grid (Purple)"
                         playerSide="left"
                         isEditor={true}
-                        onTileClick={(row, col) => handleMouseDown(row, col, 'left')}
-                        onTileEnter={(row, col) => handleMouseEnter(row, col, 'left')}
+                        onTileClick={(row, col) => handleTileClick(row, col, 'left')}
                     />
                 </div>
                 <div className="editor-grid-wrapper">
@@ -272,8 +305,7 @@ const LevelEditor = () => {
                         title="Right Grid (Cyan)"
                         playerSide="right"
                         isEditor={true}
-                        onTileClick={(row, col) => handleMouseDown(row, col, 'right')}
-                        onTileEnter={(row, col) => handleMouseEnter(row, col, 'right')}
+                        onTileClick={(row, col) => handleTileClick(row, col, 'right')}
                     />
                 </div>
             </div>
@@ -284,7 +316,6 @@ const LevelEditor = () => {
                 <ul>
                     <li><strong>Select a tool</strong> from the toolbox above</li>
                     <li><strong>Click</strong> on tiles to place the selected tool</li>
-                    <li><strong>Click and drag</strong> to paint multiple tiles at once</li>
                     <li>Both grids must have a <strong>START</strong> (🟢) and <strong>GOAL</strong> (🟡) tile</li>
                     <li>Adjust grid size (5-30 rows/cols) as needed</li>
                     <li>Set difficulty and par moves for star rating calculation</li>

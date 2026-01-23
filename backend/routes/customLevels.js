@@ -216,6 +216,118 @@ router.post('/:id/like', protect, async (req, res) => {
 });
 
 /**
+ * @route   PUT /api/custom-levels/:id
+ * @desc    Update a custom level
+ * @access  Protected
+ */
+router.put('/:id', protect, async (req, res) => {
+    try {
+        const { name, gridLeft, gridRight, difficulty, parMoves, mechanics, description } = req.body;
+
+        // Find the level
+        const customLevel = await CustomLevel.findById(req.params.id);
+
+        if (!customLevel) {
+            return res.status(404).json({
+                error: 'Not found',
+                message: 'Custom level not found'
+            });
+        }
+
+        // Check ownership
+        if (customLevel.creatorId.toString() !== req.user._id.toString()) {
+            return res.status(403).json({
+                error: 'Unauthorized',
+                message: 'You can only edit your own levels'
+            });
+        }
+
+        // Validate required fields if they are being updated
+        if (gridLeft && !Array.isArray(gridLeft) || gridRight && !Array.isArray(gridRight)) {
+            return res.status(400).json({
+                error: 'Invalid grid format',
+                message: 'gridLeft and gridRight must be 2D arrays'
+            });
+        }
+
+        // Update fields
+        if (name) customLevel.name = name;
+        if (gridLeft) customLevel.gridLeft = gridLeft;
+        if (gridRight) customLevel.gridRight = gridRight;
+        if (difficulty) customLevel.difficulty = difficulty;
+        if (parMoves) customLevel.parMoves = parMoves;
+        if (mechanics) customLevel.mechanics = mechanics;
+        if (description !== undefined) customLevel.description = description;
+
+        // Save updated level
+        const updatedLevel = await customLevel.save();
+
+        res.status(200).json({
+            message: 'Custom level updated successfully',
+            level: updatedLevel
+        });
+
+    } catch (error) {
+        console.error('Error updating custom level:', error);
+        
+        // Handle validation errors
+        if (error.name === 'ValidationError') {
+            return res.status(400).json({
+                error: 'Validation error',
+                message: error.message
+            });
+        }
+
+        res.status(500).json({
+            error: 'Server error',
+            message: 'Failed to update custom level'
+        });
+    }
+});
+
+/**
+ * @route   DELETE /api/custom-levels/:id
+ * @desc    Delete a custom level
+ * @access  Protected
+ */
+router.delete('/:id', protect, async (req, res) => {
+    try {
+        const customLevel = await CustomLevel.findById(req.params.id);
+
+        if (!customLevel) {
+            return res.status(404).json({
+                error: 'Not found',
+                message: 'Custom level not found'
+            });
+        }
+
+        // Check ownership
+        if (customLevel.creatorId.toString() !== req.user._id.toString()) {
+            return res.status(403).json({
+                error: 'Unauthorized',
+                message: 'You can only delete your own levels'
+            });
+        }
+
+        // Set isActive to false instead of hard deleting (soft delete)
+        // or actually delete it depending on requirements. 
+        // For now, let's do a hard delete to keep it simple and clean.
+        await CustomLevel.findByIdAndDelete(req.params.id);
+
+        res.status(200).json({
+            message: 'Custom level deleted successfully'
+        });
+
+    } catch (error) {
+        console.error('Error deleting custom level:', error);
+        res.status(500).json({
+            error: 'Server error',
+            message: 'Failed to delete custom level'
+        });
+    }
+});
+
+/**
  * @route   GET /api/custom-levels/user/:userId
  * @desc    Get all custom levels created by a specific user
  * @access  Public

@@ -101,10 +101,10 @@ const Dashboard = () => {
             gradient: 'linear-gradient(135deg, #00d4ff, var(--success))'
         },
         {
-            icon: '✏️',
-            title: 'Create Level',
-            description: 'Design your own levels',
-            path: '/editor',
+            icon: '🧩',
+            title: 'My Levels',
+            description: 'Create & Manage Levels',
+            path: '/my-levels',
             gradient: 'linear-gradient(135deg, #FFD700, #FF8C00)'
         }
     ];
