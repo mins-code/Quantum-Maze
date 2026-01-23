@@ -47,6 +47,32 @@
     margin: 0;
 }
 
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.back-btn {
+    background: rgba(0, 243, 255, 0.1);
+    border: 1px solid var(--neon-cyan);
+    color: var(--neon-cyan);
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    font-family: var(--font-primary);
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.back-btn:hover {
+    background: rgba(0, 243, 255, 0.2);
+    box-shadow: 0 0 15px rgba(0, 243, 255, 0.4);
+    transform: translateX(-2px);
+}
+
 .game-stats {
     display: flex;
     gap: 2rem;

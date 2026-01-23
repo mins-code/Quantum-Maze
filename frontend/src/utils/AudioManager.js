@@ -30,7 +30,15 @@ class AudioManager {
      * @param {string} basePath - Path to the base/ambient track
      * @param {string} intensePath - Path to the intense/beat track
      */
+    /**
+     * Load audio files and configure for looping
+     * @param {string} basePath - Path to the base/ambient track
+     * @param {string} intensePath - Path to the intense/beat track
+     */
     load(basePath, intensePath) {
+        // Stop any current playback before loading new tracks
+        this.stop();
+
         // Set audio sources
         this.baseTrack.src = basePath;
         this.intenseTrack.src = intensePath;
@@ -55,8 +63,12 @@ class AudioManager {
      * Ensures tracks stay in sync
      */
     async play() {
-        // If we are already fully playing, just return true
-        if (this.isPlaying && !this.playPromise) {
+        // Check if we are ACTUALLY playing (check the DOM state, not just our flag)
+        const isActuallyPlaying = !this.baseTrack.paused && !this.intenseTrack.paused;
+        
+        // If we think we're playing, but DOM says we aren't, we should try to play again.
+        // If we are fully playing, we can return true.
+        if (this.isPlaying && isActuallyPlaying && !this.playPromise) {
             return true;
         }
 
@@ -71,7 +83,7 @@ class AudioManager {
         // Create a new play promise that we can share
         this.playPromise = (async () => {
             try {
-                // Start both tracks at the same time to keep them in sync
+                // Force play both tracks
                 await Promise.all([
                     this.baseTrack.play(),
                     this.intenseTrack.play()
@@ -96,7 +108,7 @@ class AudioManager {
                     console.error('[AudioManager] Error starting playback:', error);
                 }
                 
-                // Only reset flag if it wasn't an abort error
+                // Reset flag on error
                 if (!isAbort && this.isPlaying) {
                     this.isPlaying = false;
                 }

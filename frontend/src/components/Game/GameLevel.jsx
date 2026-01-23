@@ -345,7 +345,12 @@ const GameLevel = () => {
 
             {/* Header */}
             <div className="game-header">
-                <h2 className="level-title">Quantum Maze</h2>
+                <div className="header-left">
+                    <button className="back-btn" onClick={() => navigate('/levels')}>
+                        ← Back
+                    </button>
+                    <h2 className="level-title">Quantum Maze</h2>
+                </div>
                 <div className="game-stats">
                     <div className="stat-item">
                         <span className="stat-label">Moves</span>
