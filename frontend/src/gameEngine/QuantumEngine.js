@@ -37,6 +37,10 @@ import {
     DOOR,
     PORTAL,
     COIN,
+    ONE_WAY_UP,
+    ONE_WAY_DOWN,
+    ONE_WAY_LEFT,
+    ONE_WAY_RIGHT,
     PLAYER_IDS,
     GAME_STATES,
     DIRECTION_VECTORS
@@ -254,13 +258,15 @@ export class QuantumEngine {
         const leftValid = this._isValidMove(
             leftNewPos.row,
             leftNewPos.col,
-            this.leftMaze
+            this.leftMaze,
+            direction
         );
 
         const rightValid = this._isValidMove(
             rightNewPos.row,
             rightNewPos.col,
-            this.rightMaze
+            this.rightMaze,
+            mirroredDirection
         );
 
         // CRITICAL RULE: Both players must be able to move, or neither moves
@@ -338,20 +344,26 @@ export class QuantumEngine {
      * @param {number} row - Target row
      * @param {number} col - Target column
      * @param {MazeGrid} maze - Maze to check
+     * @param {string} direction - Direction of movement
      * @returns {boolean} - True if valid
      */
-    _isValidMove(row, col, maze) {
+    _isValidMove(row, col, maze, direction) {
         // Check bounds
         if (!isWithinBounds(row, col, maze.rows, maze.cols)) {
             return false;
         }
 
         // Check if tile is walkable (not a wall)
-        // Check if tile is walkable (not a wall)
         const tile = maze.getTile(row, col);
 
         // Wall check
         if (tile === WALL) return false;
+
+        // One-Way Door Checks
+        if (tile === ONE_WAY_UP && direction !== 'UP') return false;
+        if (tile === ONE_WAY_DOWN && direction !== 'DOWN') return false;
+        if (tile === ONE_WAY_LEFT && direction !== 'LEFT') return false;
+        if (tile === ONE_WAY_RIGHT && direction !== 'RIGHT') return false;
 
         // Door check
         if (tile === DOOR) {

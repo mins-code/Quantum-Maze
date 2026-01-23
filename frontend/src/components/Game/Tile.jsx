@@ -5,6 +5,7 @@
  */
 
 import React from 'react';
+import { TILE_TYPES } from '../../gameEngine/gameConstants';
 import './Tile.css';
 
 const Tile = ({ type, isPlayer, isGhost, playerSide, isActive, isOpen, variant = 0, isFogged = false, onClick, onMouseEnter, onHover }) => {
@@ -41,6 +42,12 @@ const Tile = ({ type, isPlayer, isGhost, playerSide, isActive, isOpen, variant =
                 break;
             case 7: // COIN
                 classes.push('tile-coin');
+                break;
+            case TILE_TYPES.ONE_WAY_UP:
+            case TILE_TYPES.ONE_WAY_DOWN:
+            case TILE_TYPES.ONE_WAY_LEFT:
+            case TILE_TYPES.ONE_WAY_RIGHT:
+                classes.push('tile-oneway');
                 break;
             default:
                 classes.push('tile-empty');
@@ -122,6 +129,19 @@ const Tile = ({ type, isPlayer, isGhost, playerSide, isActive, isOpen, variant =
 
             {type === 7 && (
                 <div className="coin-item"></div>
+            )}
+
+            {(type === TILE_TYPES.ONE_WAY_UP ||
+              type === TILE_TYPES.ONE_WAY_DOWN ||
+              type === TILE_TYPES.ONE_WAY_LEFT ||
+              type === TILE_TYPES.ONE_WAY_RIGHT) && (
+                <div className="arrow-gate" style={{
+                    transform: `translate(-50%, -50%) rotate(${
+                        type === TILE_TYPES.ONE_WAY_UP ? '-90deg' :
+                        type === TILE_TYPES.ONE_WAY_DOWN ? '90deg' :
+                        type === TILE_TYPES.ONE_WAY_LEFT ? '180deg' : '0deg'
+                    })`
+                }}>➤</div>
             )}
         </div>
     );
