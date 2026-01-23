@@ -208,6 +208,14 @@ const LevelEditor = () => {
                             maxLength={100}
                         />
                     </div>
+                    
+                    <button 
+                        className="btn-back"
+                        onClick={() => navigate('/my-levels')}
+                        title="Back to My Levels"
+                    >
+                        ⬅️ Back
+                    </button>
 
                     <div className="control-group">
                         <label>Rows:</label>
