@@ -19,17 +19,9 @@ const LevelSelection = () => {
         fetchLevelsWithProgress();
     }, []);
 
-    /**
-     * Fetch levels with user's progress merged
-     * Uses /api/progress/levels endpoint which:
-     * - Returns all levels
-     * - Merges user's completion status
-     * - Ensures Level 1 is ALWAYS unlocked
-     */
     const fetchLevelsWithProgress = async () => {
         try {
             setLoading(true);
-            // Use progress endpoint to get levels with user's progress
             const response = await api.get('/progress/levels');
             setLevels(response.data.data);
             setError('');
@@ -42,8 +34,6 @@ const LevelSelection = () => {
     };
 
     const handlePlayLevel = (level) => {
-        // Level 1 is ALWAYS playable
-        // Other levels check isUnlocked status
         if (level.levelId === 1 || level.isUnlocked) {
             navigate(`/play/${level.levelId}`);
         }
@@ -51,14 +41,10 @@ const LevelSelection = () => {
 
     const getDifficultyColor = (difficulty) => {
         switch (difficulty) {
-            case 'Easy':
-                return 'var(--success)';
-            case 'Medium':
-                return 'var(--warning)';
-            case 'Hard':
-                return 'var(--error)';
-            default:
-                return 'var(--neon-cyan)';
+            case 'Easy': return 'var(--success)';
+            case 'Medium': return 'var(--warning)';
+            case 'Hard': return 'var(--error)';
+            default: return 'var(--neon-cyan)';
         }
     };
 
@@ -97,7 +83,6 @@ const LevelSelection = () => {
             {/* Levels Grid */}
             <div className="levels-grid">
                 {levels.map((level) => {
-                    // Level 1 is ALWAYS unlocked (bootstrap level)
                     const isUnlocked = level.levelId === 1 || level.isUnlocked;
 
                     return (
@@ -106,7 +91,19 @@ const LevelSelection = () => {
                             className={`level-card glass-card ${!isUnlocked ? 'locked' : ''}`}
                             onClick={() => handlePlayLevel(level)}
                         >
-                            {/* Level Number Badge */}
+                            {/* Edit Button (Top Left) */}
+                            <button
+                                className="btn-edit-builtin"
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    navigate(`/editor/builtin/${level.levelId}`);
+                                }}
+                                title="Edit Level"
+                            >
+                                ✏️
+                            </button>
+
+                            {/* Level Number Badge (Top Right) */}
                             <div className="level-badge">
                                 <span className="level-number">{level.levelId}</span>
                             </div>
@@ -146,18 +143,6 @@ const LevelSelection = () => {
                                     ))}
                                 </div>
 
-                                {/* Edit Button for Built-in Levels */}
-                                <button
-                                    className="btn-edit-builtin"
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        navigate(`/editor/builtin/${level.levelId}`);
-                                    }}
-                                    title="Edit Level"
-                                >
-                                    ✏️
-                                </button>
-
                                 {level.isCompleted && (
                                     <div className="completed-badge">
                                         ✓ COMPLETED
@@ -174,7 +159,7 @@ const LevelSelection = () => {
                                 </div>
                             )}
 
-                            {/* Play Button */}
+                            {/* Play Button Overlay */}
                             {isUnlocked && (
                                 <div className="play-overlay">
                                     <button className="play-btn">
