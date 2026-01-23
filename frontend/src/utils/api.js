@@ -60,20 +60,24 @@ api.interceptors.response.use(
 // ==================== GAME API FUNCTIONS ====================
 
 /**
- * Submit score with replay history
+ * Submit score with replay history and coin data
  * @param {number} levelId - Level ID
  * @param {number} moves - Number of moves
  * @param {number} timeTaken - Time taken in seconds
  * @param {Array} history - Replay history array
+ * @param {number} coinsCollected - Number of coins collected
+ * @param {number} maxCoins - Total coins available in level
  * @returns {Promise} - API response
  */
-export const submitScore = async (levelId, moves, timeTaken, history = []) => {
+export const submitScore = async (levelId, moves, timeTaken, history = [], coinsCollected = 0, maxCoins = 0) => {
     try {
         const response = await api.post('/game/score', {
             levelId,
             moves,
             timeTaken,
-            replayHistory: history
+            replayHistory: history,
+            coinsCollected,
+            maxCoins
         });
         return response.data;
     } catch (error) {

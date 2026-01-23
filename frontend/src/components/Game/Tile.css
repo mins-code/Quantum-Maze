@@ -211,6 +211,46 @@
     }
 }
 
+/* Coin Tile */
+.tile-coin {
+    background: radial-gradient(circle at center,
+            rgba(255, 215, 0, 0.15) 0%,
+            rgba(255, 215, 0, 0.05) 50%,
+            transparent 100%);
+    border-color: rgba(255, 215, 0, 0.3);
+}
+
+.coin-item {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 50%;
+    height: 50%;
+    background: radial-gradient(circle at 30% 30%,
+            #fff9c4,
+            #ffd700 50%,
+            #daa520);
+    border-radius: 50%;
+    box-shadow:
+        0 0 10px rgba(255, 215, 0, 0.8),
+        0 0 20px rgba(255, 215, 0, 0.4),
+        inset 0 0 10px rgba(255, 255, 255, 0.3);
+    animation: coinFloat 2s ease-in-out infinite;
+}
+
+@keyframes coinFloat {
+
+    0%,
+    100% {
+        transform: translate(-50%, -50%) translateY(0);
+    }
+
+    50% {
+        transform: translate(-50%, -50%) translateY(-8px);
+    }
+}
+
 /* Player Indicator */
 .tile-player {
     z-index: 10;

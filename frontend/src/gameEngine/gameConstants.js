@@ -12,7 +12,8 @@ export const TILE_TYPES = {
     START: 3,
     SWITCH: 4,
     DOOR: 5,
-    PORTAL: 6
+    PORTAL: 6,
+    COIN: 7
 };
 
 // Individual tile type exports for convenience
@@ -23,6 +24,7 @@ export const START = TILE_TYPES.START;
 export const SWITCH = TILE_TYPES.SWITCH;
 export const DOOR = TILE_TYPES.DOOR;
 export const PORTAL = TILE_TYPES.PORTAL;
+export const COIN = TILE_TYPES.COIN;
 
 // Direction Constants
 export const DIRECTIONS = {

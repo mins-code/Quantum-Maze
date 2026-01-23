@@ -71,7 +71,7 @@ router.get('/levels/:levelId', async (req, res) => {
  */
 router.post('/score', protect, async (req, res) => {
     try {
-        const { levelId, moves, timeTaken, undoCount, hintsUsed, replayHistory } = req.body;
+        const { levelId, moves, timeTaken, undoCount, hintsUsed, replayHistory, coinsCollected, maxCoins } = req.body;
 
         if (!levelId || moves === undefined || timeTaken === undefined) {
             return res.status(400).json({
@@ -92,6 +92,11 @@ router.post('/score', protect, async (req, res) => {
         // Calculate stars
         const stars = level.calculateStars(moves);
 
+        // Determine if all coins were collected
+        const allCoinsCollected = (coinsCollected !== undefined && maxCoins !== undefined)
+            ? coinsCollected === maxCoins
+            : false;
+
         // Check if user already has a score for this level
         const existingScore = await Score.getBestScore(req.user._id, levelId);
 
@@ -110,6 +115,9 @@ router.post('/score', protect, async (req, res) => {
                     stars,
                     undoCount: undoCount || 0,
                     hintsUsed: hintsUsed || 0,
+                    coinsCollected: coinsCollected || 0,
+                    maxCoins: maxCoins || 0,
+                    allCoinsCollected,
                     replayHistory: replayHistory || [],
                     completedAt: Date.now()
                 },

@@ -36,6 +36,7 @@ import {
     SWITCH,
     DOOR,
     PORTAL,
+    COIN,
     PLAYER_IDS,
     GAME_STATES,
     DIRECTION_VECTORS
@@ -85,6 +86,10 @@ export class QuantumEngine {
         // Goal positions
         this.leftGoal = { row: 0, col: 0 };
         this.rightGoal = { row: 0, col: 0 };
+
+        // Coin collection tracking
+        this.coinsCollected = 0;
+        this.totalCoins = 0;
     }
 
     /**
@@ -125,6 +130,19 @@ export class QuantumEngine {
             for (let row = 0; row < rows; row++) {
                 for (let col = 0; col < cols; col++) {
                     this.rightMaze.setTile(row, col, levelData.gridRight[row][col]);
+                }
+            }
+
+            // Count total coins in both grids
+            this.totalCoins = 0;
+            for (let row = 0; row < rows; row++) {
+                for (let col = 0; col < cols; col++) {
+                    if (levelData.gridLeft[row][col] === COIN) {
+                        this.totalCoins++;
+                    }
+                    if (levelData.gridRight[row][col] === COIN) {
+                        this.totalCoins++;
+                    }
                 }
             }
 
@@ -466,6 +484,24 @@ export class QuantumEngine {
         this.startTime = Date.now();
         this.endTime = null;
 
+        // Reset coin collection
+        this.coinsCollected = 0;
+
+        // Recalculate total coins from current grid state
+        this.totalCoins = 0;
+        if (this.leftMaze && this.rightMaze) {
+            for (let row = 0; row < this.leftMaze.rows; row++) {
+                for (let col = 0; col < this.leftMaze.cols; col++) {
+                    if (this.leftMaze.getTile(row, col) === COIN) {
+                        this.totalCoins++;
+                    }
+                    if (this.rightMaze.getTile(row, col) === COIN) {
+                        this.totalCoins++;
+                    }
+                }
+            }
+        }
+
         // Find and reset to start positions
         this._findStartPositions();
 
@@ -541,7 +577,9 @@ export class QuantumEngine {
             canRedo: !this.redoStack.isEmpty(),
             activeSwitches: this.switches.getActiveSwitches(),
             intensity: this.calculateCurrentIntensity(),
-            distanceToGoal: this.getMinDistanceToGoal()
+            distanceToGoal: this.getMinDistanceToGoal(),
+            coinsCollected: this.coinsCollected,
+            totalCoins: this.totalCoins
         };
     }
 
@@ -552,6 +590,14 @@ export class QuantumEngine {
     _handleMechanics(playerPos, maze) {
         const tile = maze.getTile(playerPos.row, playerPos.col);
         const tileId = getTileId(playerPos.row, playerPos.col);
+
+        // Handle Coin Collection
+        if (tile === COIN) {
+            console.log(`[Engine] Coin collected at ${playerPos.row},${playerPos.col}!`);
+            this.coinsCollected++;
+            // Remove the coin by setting tile to EMPTY
+            maze.setTile(playerPos.row, playerPos.col, EMPTY);
+        }
 
         // Handle Switch
         if (tile === SWITCH) {
@@ -784,14 +830,14 @@ export class QuantumEngine {
             left: { row: this.leftPlayer.row, col: this.leftPlayer.col },
             right: { row: this.rightPlayer.row, col: this.rightPlayer.col }
         };
-        
+
         // If we have move history, use the initial positions from first move
         const firstMove = this.moveHistory.getFirst();
         if (firstMove) {
             startPositions.left = { row: firstMove.leftFrom.row, col: firstMove.leftFrom.col };
             startPositions.right = { row: firstMove.rightFrom.row, col: firstMove.rightFrom.col };
         }
-        
+
         historyArray.push(startPositions);
 
         // Traverse the linked list and extract positions

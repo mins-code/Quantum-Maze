@@ -48,6 +48,21 @@ const scoreSchema = new mongoose.Schema({
         default: 0,
         min: [0, 'Hints used cannot be negative']
     },
+    // Coin collection data
+    coinsCollected: {
+        type: Number,
+        default: 0,
+        min: [0, 'Coins collected cannot be negative']
+    },
+    maxCoins: {
+        type: Number,
+        default: 0,
+        min: [0, 'Max coins cannot be negative']
+    },
+    allCoinsCollected: {
+        type: Boolean,
+        default: false
+    },
     // Replay data for ghost system
     replayHistory: {
         type: [Object],
@@ -59,14 +74,26 @@ const scoreSchema = new mongoose.Schema({
     }
 });
 
+// ==================== INDEXES ====================
+
 // Compound index to ensure one score per user per level (keep best score)
 scoreSchema.index({ userId: 1, levelId: 1 });
 
-// Index for leaderboard queries
-scoreSchema.index({ levelId: 1, stars: -1, timeTaken: 1 });
+// Compound indexes for leaderboard queries - optimized for sorting
+// Index for time-based leaderboard sorting
+scoreSchema.index({ levelId: 1, timeTaken: 1 });
+
+// Index for moves-based leaderboard sorting
+scoreSchema.index({ levelId: 1, moves: 1 });
+
+// Index for per-user grouping in aggregation pipeline
+scoreSchema.index({ levelId: 1, userId: 1 });
+
+// Index for user progress queries
 scoreSchema.index({ userId: 1, completedAt: -1 });
 
-// Pre-save middleware to update user stats
+// ==================== MIDDLEWARE ====================
+
 scoreSchema.pre('save', async function (next) {
     try {
         // Only update user stats on new score records

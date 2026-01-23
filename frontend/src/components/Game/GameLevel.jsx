@@ -36,7 +36,9 @@ const GameLevel = () => {
         elapsedTime: 0,
         canUndo: false,
         canRedo: false,
-        activeSwitches: []
+        activeSwitches: [],
+        coinsCollected: 0,
+        totalCoins: 0
     });
 
     const [message, setMessage] = useState('');
@@ -86,7 +88,7 @@ const GameLevel = () => {
                     // Load and play audio tracks
                     AudioManager.load('/music/cyber_ambience.mp3', '/music/cyber_beat.mp3');
                     const audioStarted = await AudioManager.play();
-                    
+
                     if (!audioStarted) {
                         console.log('Audio autoplay blocked - waiting for user interaction');
                         const resumeAudio = async () => {
@@ -162,8 +164,18 @@ const GameLevel = () => {
             // Export replay history from engine
             const replayHistory = engineRef.current.exportHistory();
 
-            // Submit score with replay data
-            const scoreResponse = await submitScore(parseInt(id), moves, time, replayHistory);
+            // Get current stats including coin data
+            const currentStats = engineRef.current.getStats();
+
+            // Submit score with replay data and coin data
+            const scoreResponse = await submitScore(
+                parseInt(id),
+                moves,
+                time,
+                replayHistory,
+                currentStats.coinsCollected,
+                currentStats.totalCoins
+            );
             console.log('Score submitted:', scoreResponse);
 
             // Also save to progress endpoint
@@ -363,6 +375,10 @@ const GameLevel = () => {
                     <div className="stat-item">
                         <span className="stat-label">Time</span>
                         <span className="stat-value">{stats.elapsedTime}s</span>
+                    </div>
+                    <div className="stat-item">
+                        <span className="stat-label">Coins</span>
+                        <span className="stat-value">🪙 {stats.coinsCollected} / {stats.totalCoins}</span>
                     </div>
                 </div>
             </div>

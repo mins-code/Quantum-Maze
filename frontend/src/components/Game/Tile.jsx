@@ -39,6 +39,9 @@ const Tile = ({ type, isPlayer, isGhost, playerSide, isActive, isOpen, variant =
             case 6: // PORTAL
                 classes.push('tile-portal');
                 break;
+            case 7: // COIN
+                classes.push('tile-coin');
+                break;
             default:
                 classes.push('tile-empty');
         }
@@ -98,6 +101,10 @@ const Tile = ({ type, isPlayer, isGhost, playerSide, isActive, isOpen, variant =
                     <div className="portal-vortex"></div>
                     <div className="portal-core"></div>
                 </div>
+            )}
+
+            {type === 7 && (
+                <div className="coin-item"></div>
             )}
         </div>
     );
