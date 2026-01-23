@@ -7,7 +7,7 @@
 import React from 'react';
 import './Tile.css';
 
-const Tile = ({ type, isPlayer, isGhost, playerSide, isActive, isOpen, variant = 0 }) => {
+const Tile = ({ type, isPlayer, isGhost, playerSide, isActive, isOpen, variant = 0, isFogged = false }) => {
     // Determine tile class based on type
     const getTileClass = () => {
         const classes = ['tile'];
@@ -52,6 +52,11 @@ const Tile = ({ type, isPlayer, isGhost, playerSide, isActive, isOpen, variant =
         // Add ghost effect for mirrored visualization
         if (isGhost) {
             classes.push('tile-ghost');
+        }
+
+        // Add fog effect for Fog of War
+        if (isFogged) {
+            classes.push('fog-hidden');
         }
 
         return classes.join(' ');

@@ -410,6 +410,7 @@
 }
 
 @keyframes ghostPulse {
+
     0%,
     100% {
         transform: translate(-50%, -50%) scale(1);
@@ -423,6 +424,7 @@
 }
 
 @keyframes ghostGlowPulse {
+
     0%,
     100% {
         opacity: 0.3;
@@ -431,6 +433,20 @@
     50% {
         opacity: 0.5;
     }
+}
+
+/* Fog of War Effect - Complete Obscurity */
+.tile.fog-hidden {
+    background-color: #000 !important;
+    border: none !important;
+    pointer-events: none;
+    opacity: 1 !important;
+    box-shadow: none !important;
+}
+
+/* Hide all child elements to prevent DOM inspection cheating */
+.tile.fog-hidden * {
+    display: none !important;
 }
 
 /* Responsive */
