@@ -13,6 +13,7 @@ import QuantumEngine from '../../gameEngine/QuantumEngine';
 import { KEY_TO_DIRECTION } from '../../gameEngine/gameConstants';
 import api from '../../utils/api';
 import Legend from './Legend';
+import AudioManager from '../../utils/AudioManager';
 import './GameLevel.css';
 
 const GameLevel = () => {
@@ -80,6 +81,10 @@ const GameLevel = () => {
 
                     updateStats();
                     setMessage('Use Arrow Keys or WASD to move. Both players must move together!');
+
+                    // Load and play audio tracks
+                    AudioManager.load('/music/cyber_ambience.mp3', '/music/cyber_beat.mp3');
+                    AudioManager.play();
                 } else {
                     setError('Failed to load level');
                 }
@@ -94,6 +99,8 @@ const GameLevel = () => {
         fetchAndLoadLevel();
 
         return () => {
+            // Cleanup: Stop audio when component unmounts
+            AudioManager.stop();
             engineRef.current = null;
         };
     }, [id]);
@@ -217,6 +224,11 @@ const GameLevel = () => {
     const updateStats = () => {
         const newStats = engineRef.current.getStats();
         setStats(newStats);
+
+        // Update audio based on distance to goal (plays beat when ≤5 steps away)
+        if (newStats.distanceToGoal !== undefined) {
+            AudioManager.setDistanceFromGoal(newStats.distanceToGoal);
+        }
     };
 
     const handleReplay = () => {

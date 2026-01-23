@@ -48,7 +48,8 @@ import {
     calculateStars,
     getTileId,
     positionsEqual,
-    deepClone
+    deepClone,
+    calculateManhattanDistance
 } from './helperUtils.js';
 
 export class QuantumEngine {
@@ -485,6 +486,38 @@ export class QuantumEngine {
     }
 
     /**
+     * Get minimum distance to goal from either player
+     * @returns {number} - Minimum Manhattan distance to goal
+     */
+    getMinDistanceToGoal() {
+        // Calculate distance from each player to their respective goal
+        const leftDistance = calculateManhattanDistance(this.leftPlayer, this.leftGoal);
+        const rightDistance = calculateManhattanDistance(this.rightPlayer, this.rightGoal);
+
+        // Return the minimum distance (whichever player is closest to winning)
+        return Math.min(leftDistance, rightDistance);
+    }
+
+    /**
+     * Calculate current audio intensity based on player progress
+     * @returns {number} - Intensity value between 0.0 (farthest) and 1.0 (on goal)
+     */
+    calculateCurrentIntensity() {
+        // Calculate distance from each player to their respective goal
+        const leftDistance = calculateManhattanDistance(this.leftPlayer, this.leftGoal);
+        const rightDistance = calculateManhattanDistance(this.rightPlayer, this.rightGoal);
+
+        // Find the minimum distance (whichever player is closest to winning)
+        const minDistance = Math.min(leftDistance, rightDistance);
+
+        // Calculate max possible distance (roughly rows + cols)
+        const maxDistance = this.leftMaze.rows + this.leftMaze.cols;
+
+        // Return normalized value: 1.0 when on goal (distance = 0), 0.0 when farthest away
+        return 1.0 - (minDistance / maxDistance);
+    }
+
+    /**
      * Get current game statistics
      * @returns {Object} - Game stats
      */
@@ -503,7 +536,9 @@ export class QuantumEngine {
             gameState: this.gameState,
             canUndo: !this.undoStack.isEmpty(),
             canRedo: !this.redoStack.isEmpty(),
-            activeSwitches: this.switches.getActiveSwitches()
+            activeSwitches: this.switches.getActiveSwitches(),
+            intensity: this.calculateCurrentIntensity(),
+            distanceToGoal: this.getMinDistanceToGoal()
         };
     }
 

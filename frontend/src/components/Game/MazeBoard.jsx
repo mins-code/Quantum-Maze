@@ -4,8 +4,9 @@
  * Renders a complete maze grid using CSS Grid layout
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import Tile from './Tile';
+import AudioManager from '../../utils/AudioManager';
 import './MazeBoard.css';
 
 const MazeBoard = ({
@@ -16,6 +17,8 @@ const MazeBoard = ({
     mechanics,
     activeSwitches = []
 }) => {
+    const [isMuted, setIsMuted] = useState(false);
+
     if (!gridData || gridData.length === 0) {
         return (
             <div className="maze-board-empty">
@@ -26,6 +29,12 @@ const MazeBoard = ({
 
     const rows = gridData.length;
     const cols = gridData[0].length;
+
+    // Handle music toggle
+    const handleMusicToggle = () => {
+        const newMuteState = AudioManager.toggleMute();
+        setIsMuted(newMuteState);
+    };
 
     // Helper to get mechanic state
     const getMechanicProps = (rowIndex, colIndex, type) => {
@@ -79,6 +88,16 @@ const MazeBoard = ({
                     <div className={`player-dot ${playerSide}`}></div>
                     <span>{playerSide === 'left' ? 'Purple Player' : 'Cyan Player'}</span>
                 </div>
+                {/* Music Toggle Button - Only show on left board */}
+                {playerSide === 'left' && (
+                    <button 
+                        className="music-toggle-btn"
+                        onClick={handleMusicToggle}
+                        title={isMuted ? 'Unmute Music' : 'Mute Music'}
+                    >
+                        {isMuted ? '🔇' : '🔊'}
+                    </button>
+                )}
             </div>
 
             {/* Grid */}

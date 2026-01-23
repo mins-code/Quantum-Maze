@@ -1,10 +1,10 @@
 /**
  * Helper Utilities - Quantum Maze
- * 
+ *
  * Utility functions for game logic calculations
  */
 
-import { DIRECTION_VECTORS, MIRRORED_DIRECTIONS } from './gameConstants.js';
+import { DIRECTION_VECTORS, MIRRORED_DIRECTIONS } from "./gameConstants.js";
 
 /**
  * Calculate new position based on direction
@@ -14,11 +14,11 @@ import { DIRECTION_VECTORS, MIRRORED_DIRECTIONS } from './gameConstants.js';
  * @returns {Object} - New position {row, col}
  */
 export function calculateNewPosition(row, col, direction) {
-    const vector = DIRECTION_VECTORS[direction];
-    return {
-        row: row + vector.row,
-        col: col + vector.col
-    };
+  const vector = DIRECTION_VECTORS[direction];
+  return {
+    row: row + vector.row,
+    col: col + vector.col,
+  };
 }
 
 /**
@@ -27,7 +27,7 @@ export function calculateNewPosition(row, col, direction) {
  * @returns {string} - Mirrored direction
  */
 export function getMirroredDirection(direction) {
-    return MIRRORED_DIRECTIONS[direction];
+  return MIRRORED_DIRECTIONS[direction];
 }
 
 /**
@@ -39,7 +39,7 @@ export function getMirroredDirection(direction) {
  * @returns {boolean} - True if within bounds
  */
 export function isWithinBounds(row, col, maxRows, maxCols) {
-    return row >= 0 && row < maxRows && col >= 0 && col < maxCols;
+  return row >= 0 && row < maxRows && col >= 0 && col < maxCols;
 }
 
 /**
@@ -51,7 +51,17 @@ export function isWithinBounds(row, col, maxRows, maxCols) {
  * @returns {number} - Manhattan distance
  */
 export function manhattanDistance(row1, col1, row2, col2) {
-    return Math.abs(row1 - row2) + Math.abs(col1 - col2);
+  return Math.abs(row1 - row2) + Math.abs(col1 - col2);
+}
+
+/**
+ * Calculate Manhattan distance between two position objects
+ * @param {Object} pos1 - First position {row, col}
+ * @param {Object} pos2 - Second position {row, col}
+ * @returns {number} - Manhattan distance
+ */
+export function calculateManhattanDistance(pos1, pos2) {
+  return Math.abs(pos1.row - pos2.row) + Math.abs(pos1.col - pos2.col);
 }
 
 /**
@@ -61,10 +71,10 @@ export function manhattanDistance(row1, col1, row2, col2) {
  * @returns {number} - Stars earned (0-3)
  */
 export function calculateStars(moves, par) {
-    if (moves <= par) return 3;
-    if (moves <= par * 1.5) return 2;
-    if (moves <= par * 2) return 1;
-    return 0;
+  if (moves <= par) return 3;
+  if (moves <= par * 1.5) return 2;
+  if (moves <= par * 2) return 1;
+  return 0;
 }
 
 /**
@@ -73,9 +83,9 @@ export function calculateStars(moves, par) {
  * @returns {string} - Formatted time string
  */
 export function formatTime(seconds) {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  const mins = Math.floor(seconds / 60);
+  const secs = seconds % 60;
+  return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
 }
 
 /**
@@ -85,7 +95,7 @@ export function formatTime(seconds) {
  * @returns {string} - Unique tile ID
  */
 export function getTileId(row, col) {
-    return `tile_${row}_${col}`;
+  return `tile_${row}_${col}`;
 }
 
 /**
@@ -94,11 +104,11 @@ export function getTileId(row, col) {
  * @returns {Object} - Coordinates {row, col}
  */
 export function parseTileId(tileId) {
-    const parts = tileId.split('_');
-    return {
-        row: parseInt(parts[1], 10),
-        col: parseInt(parts[2], 10)
-    };
+  const parts = tileId.split("_");
+  return {
+    row: parseInt(parts[1], 10),
+    col: parseInt(parts[2], 10),
+  };
 }
 
 /**
@@ -107,7 +117,7 @@ export function parseTileId(tileId) {
  * @returns {Object} - Cloned object
  */
 export function deepClone(obj) {
-    return JSON.parse(JSON.stringify(obj));
+  return JSON.parse(JSON.stringify(obj));
 }
 
 /**
@@ -117,18 +127,19 @@ export function deepClone(obj) {
  * @returns {boolean} - True if equal
  */
 export function positionsEqual(pos1, pos2) {
-    return pos1.row === pos2.row && pos1.col === pos2.col;
+  return pos1.row === pos2.row && pos1.col === pos2.col;
 }
 
 export default {
-    calculateNewPosition,
-    getMirroredDirection,
-    isWithinBounds,
-    manhattanDistance,
-    calculateStars,
-    formatTime,
-    getTileId,
-    parseTileId,
-    deepClone,
-    positionsEqual
+  calculateNewPosition,
+  getMirroredDirection,
+  isWithinBounds,
+  manhattanDistance,
+  calculateManhattanDistance,
+  calculateStars,
+  formatTime,
+  getTileId,
+  parseTileId,
+  deepClone,
+  positionsEqual,
 };
