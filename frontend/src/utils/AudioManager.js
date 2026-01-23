@@ -57,7 +57,7 @@ class AudioManager {
     async play() {
         if (this.isPlaying) {
             console.warn('[AudioManager] Already playing');
-            return;
+            return true;
         }
 
         this.isPlaying = true;
@@ -75,8 +75,10 @@ class AudioManager {
                 this.intenseTrack.pause();
                 this.baseTrack.currentTime = 0;
                 this.intenseTrack.currentTime = 0;
+                return false;
             } else {
                 console.log('[AudioManager] Playback started');
+                return true;
             }
         } catch (error) {
             const isAbort = error.name === 'AbortError';
@@ -88,10 +90,10 @@ class AudioManager {
             
             // Only reset flag if it wasn't an abort error (e.g. autoplay prevention, network error)
             // Abort errors usually mean we were stopped/paused intentionally or superceded by a new request.
-            // If we reset on AbortError, we might accidentally clear the flag set by a subsequent play() call.
             if (!isAbort && this.isPlaying) {
                 this.isPlaying = false;
             }
+            return false;
         }
     }
 

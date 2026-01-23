@@ -85,7 +85,20 @@ const GameLevel = () => {
 
                     // Load and play audio tracks
                     AudioManager.load('/music/cyber_ambience.mp3', '/music/cyber_beat.mp3');
-                    AudioManager.play();
+                    const audioStarted = await AudioManager.play();
+                    
+                    if (!audioStarted) {
+                        console.log('Audio autoplay blocked - waiting for user interaction');
+                        const resumeAudio = async () => {
+                            const success = await AudioManager.play();
+                            if (success) {
+                                document.removeEventListener('click', resumeAudio);
+                                document.removeEventListener('keydown', resumeAudio);
+                            }
+                        };
+                        document.addEventListener('click', resumeAudio);
+                        document.addEventListener('keydown', resumeAudio);
+                    }
 
                     // Load ghost replay data
                     const replayData = await fetchBestReplay(id);
