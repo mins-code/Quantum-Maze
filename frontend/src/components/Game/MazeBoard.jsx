@@ -22,7 +22,8 @@ const MazeBoard = ({
     onTileClick = null,
     onTileEnter = null,
     onTileHover = null,
-    isShaking = false
+    isShaking = false,
+    currentMoveCount = 0
 }) => {
     const [isMuted, setIsMuted] = useState(false);
 
@@ -145,6 +146,7 @@ const MazeBoard = ({
                                 variant={mechanicProps.variant}
                                 isGhost={isGhost}
                                 isFogged={!isVisible}
+                                currentMoveCount={currentMoveCount}
                                 onClick={isEditor && onTileClick ? () => onTileClick(rowIndex, colIndex) : undefined}
                                 onMouseEnter={isEditor && onTileEnter ? () => onTileEnter(rowIndex, colIndex) : undefined}
                                 onHover={onTileHover ? (data) => {

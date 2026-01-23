@@ -521,6 +521,23 @@
     }
 }
 
+/* Schrödinger's Tiles (Quantum Flux) */
+.schrodinger-wall {
+    background: rgba(153, 50, 204, 0.2);
+    border: 2px dashed cyan;
+    box-shadow: 0 0 10px rgba(0, 255, 255, 0.4);
+    opacity: 1;
+    transition: all 0.3s ease;
+}
+
+.schrodinger-floor {
+    background: rgba(153, 50, 204, 0.05);
+    opacity: 0.3;
+    filter: hue-rotate(90deg);
+    border: 1px dotted rgba(153, 50, 204, 0.3);
+    transition: all 0.3s ease;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
     .tile {

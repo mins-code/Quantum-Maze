@@ -5,10 +5,10 @@
  */
 
 import React from 'react';
-import { TILE_TYPES } from '../../gameEngine/gameConstants';
+import { TILE_TYPES, SCHRODINGER } from '../../gameEngine/gameConstants';
 import './Tile.css';
 
-const Tile = ({ type, isPlayer, isGhost, playerSide, isActive, isOpen, variant = 0, isFogged = false, onClick, onMouseEnter, onHover }) => {
+const Tile = ({ type, isPlayer, isGhost, playerSide, isActive, isOpen, variant = 0, isFogged = false, currentMoveCount = 0, onClick, onMouseEnter, onHover }) => {
     // Determine tile class based on type
     const getTileClass = () => {
         const classes = ['tile'];
@@ -47,7 +47,15 @@ const Tile = ({ type, isPlayer, isGhost, playerSide, isActive, isOpen, variant =
             case TILE_TYPES.ONE_WAY_DOWN:
             case TILE_TYPES.ONE_WAY_LEFT:
             case TILE_TYPES.ONE_WAY_RIGHT:
+            case TILE_TYPES.ONE_WAY_RIGHT:
                 classes.push('tile-oneway');
+                break;
+            case SCHRODINGER:
+                // Visual logic: 
+                // Moves 0-2 (0/3=0 even) -> Floor (Passable)
+                // Moves 3-5 (3/3=1 odd) -> Wall (Solid)
+                const isSolid = Math.floor(currentMoveCount / 3) % 2 !== 0;
+                classes.push(isSolid ? 'schrodinger-wall' : 'schrodinger-floor');
                 break;
             default:
                 classes.push('tile-empty');

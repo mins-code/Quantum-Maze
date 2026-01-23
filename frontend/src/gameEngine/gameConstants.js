@@ -17,7 +17,8 @@ export const TILE_TYPES = {
     ONE_WAY_UP: 9,
     ONE_WAY_DOWN: 10,
     ONE_WAY_LEFT: 11,
-    ONE_WAY_RIGHT: 12
+    ONE_WAY_RIGHT: 12,
+    SCHRODINGER: 8
 };
 
 // Individual tile type exports for convenience
@@ -33,6 +34,7 @@ export const ONE_WAY_UP = TILE_TYPES.ONE_WAY_UP;
 export const ONE_WAY_DOWN = TILE_TYPES.ONE_WAY_DOWN;
 export const ONE_WAY_LEFT = TILE_TYPES.ONE_WAY_LEFT;
 export const ONE_WAY_RIGHT = TILE_TYPES.ONE_WAY_RIGHT;
+export const SCHRODINGER = TILE_TYPES.SCHRODINGER;
 
 // Tile Metadata - For Live Tile Preview Scanner
 export const TILE_METADATA = {
@@ -107,6 +109,12 @@ export const TILE_METADATA = {
         description: 'One-way barrier. Only allows passage when moving RIGHT.',
         hazardLevel: 'RESTRICTION',
         color: '#00ccff'
+    },
+    [TILE_TYPES.SCHRODINGER]: {
+        name: 'Quantum Flux',
+        description: 'Oscillates between solid and intangible every 3 moves.',
+        hazardLevel: 'UNSTABLE',
+        color: '#9932cc'
     }
 };
 

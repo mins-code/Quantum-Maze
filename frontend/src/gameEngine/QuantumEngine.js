@@ -41,6 +41,7 @@ import {
     ONE_WAY_DOWN,
     ONE_WAY_LEFT,
     ONE_WAY_RIGHT,
+    SCHRODINGER,
     PLAYER_IDS,
     GAME_STATES,
     DIRECTION_VECTORS
@@ -364,6 +365,15 @@ export class QuantumEngine {
         if (tile === ONE_WAY_DOWN && direction !== 'DOWN') return false;
         if (tile === ONE_WAY_LEFT && direction !== 'LEFT') return false;
         if (tile === ONE_WAY_RIGHT && direction !== 'RIGHT') return false;
+
+        // Schrödinger Tile Check
+        if (tile === SCHRODINGER) {
+            // If solid, treat as WALL (return false)
+            if (this._isSchrodingerSolid(this.moveCount)) {
+                return false;
+            }
+            // If not solid, treat as EMPTY (continue)
+        }
 
         // Door check
         if (tile === DOOR) {
@@ -789,6 +799,19 @@ export class QuantumEngine {
             row: parseInt(parts[1], 10),
             col: parseInt(parts[2], 10)
         };
+    }
+
+    /**
+     * Check if Schrödinger tile is solid based on move count
+     * @param {number} moveCount - Current move count
+     * @returns {boolean} - True if solid (WALL), false if intangible (FLOOR)
+     * @private
+     */
+    _isSchrodingerSolid(moveCount) {
+        // Changes state every 3 moves
+        // If (moveCount / 3) is odd, it's solid (WALL)
+        // If (moveCount / 3) is even, it's empty (FLOOR)
+        return Math.floor(moveCount / 3) % 2 !== 0;
     }
 
     /**
