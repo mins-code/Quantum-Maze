@@ -192,17 +192,16 @@
 }
 
 .completed-badge {
-    position: absolute;
-    bottom: 5.5rem;
-    left: 1rem;
-    padding: 0.45rem 1rem;
+    display: inline-block;
+    margin-left: 1rem;
+    padding: 0.35rem 0.85rem;
     background: rgba(0, 255, 136, 0.2);
     border: 2px solid var(--success);
     border-radius: 20px;
-    font-size: 0.75rem;
+    font-size: 0.7rem;
     color: var(--success);
     font-weight: 700;
-    z-index: 2;
+    vertical-align: middle;
 }
 
 .locked-overlay {

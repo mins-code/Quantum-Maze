@@ -8,6 +8,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import MazeBoard from './MazeBoard';
+import TileLegend from './TileLegend';
 import VictoryModal from './VictoryModal';
 import QuantumEngine from '../../gameEngine/QuantumEngine';
 import { KEY_TO_DIRECTION } from '../../gameEngine/gameConstants';
@@ -42,6 +43,7 @@ const GameLevel = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [showVictoryModal, setShowVictoryModal] = useState(false);
+    const [activatedSwitches, setActivatedSwitches] = useState([]);
 
     // Fetch and initialize level
     useEffect(() => {
@@ -161,6 +163,12 @@ const GameLevel = () => {
         } else {
             setMessage(`❌ ${result.reason} - Both players must move!`);
             setTimeout(() => setMessage(''), 2000);
+        }
+
+        // Update activated switches for visual feedback
+        if (engineRef.current) {
+            const switches = engineRef.current.switches.getActiveSwitches();
+            setActivatedSwitches(switches);
         }
     };
 
@@ -305,6 +313,9 @@ const GameLevel = () => {
                 </div>
             )}
 
+            {/* Tile Legend */}
+            <TileLegend />
+
             {/* Dual Maze Boards */}
             <div className="maze-boards-container">
                 <MazeBoard
@@ -312,6 +323,8 @@ const GameLevel = () => {
                     playerPosition={gameState.leftPlayer}
                     playerSide="left"
                     title="Left Maze"
+                    activatedSwitches={activatedSwitches}
+                    switchDoorPairs={engineRef.current?.leftSwitchDoorPairs || new Map()}
                 />
 
                 <div className="boards-divider">
@@ -327,6 +340,8 @@ const GameLevel = () => {
                     playerPosition={gameState.rightPlayer}
                     playerSide="right"
                     title="Right Maze"
+                    activatedSwitches={activatedSwitches}
+                    switchDoorPairs={engineRef.current?.rightSwitchDoorPairs || new Map()}
                 />
             </div>
 

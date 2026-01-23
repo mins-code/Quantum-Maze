@@ -86,6 +86,17 @@
     margin: 0 auto;
 }
 
+/* Dynamic sizing for larger grids */
+.maze-board-grid[style*="repeat(20"] {
+    max-width: 800px;
+    gap: 2px;
+}
+
+.maze-board-grid[style*="repeat(1"][style*=", 1fr)"][style*="repeat(1"] {
+    max-width: 800px;
+    gap: 2px;
+}
+
 /* Responsive Grid Sizes */
 @media (min-width: 1400px) {
     .maze-board-grid {

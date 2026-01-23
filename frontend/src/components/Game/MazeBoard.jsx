@@ -12,7 +12,9 @@ const MazeBoard = ({
     gridData,
     playerPosition,
     playerSide,
-    title
+    title,
+    activatedSwitches = [],
+    switchDoorPairs = new Map()
 }) => {
     if (!gridData || gridData.length === 0) {
         return (
@@ -51,12 +53,27 @@ const MazeBoard = ({
                             playerPosition.row === rowIndex &&
                             playerPosition.col === colIndex;
 
+                        // Check if this door is unlocked
+                        let isDoorOpen = false;
+                        if (tileType === 5 || (tileType >= 20 && tileType <= 26)) { // Door or numbered door
+                            const doorId = `tile_${rowIndex}_${colIndex}`;
+                            // Find which switch unlocks this door
+                            for (const [switchId, pairedDoorId] of switchDoorPairs.entries()) {
+                                if (pairedDoorId === doorId) {
+                                    // Check if this switch is activated
+                                    isDoorOpen = activatedSwitches.includes(switchId);
+                                    break;
+                                }
+                            }
+                        }
+
                         return (
                             <Tile
                                 key={`${rowIndex}-${colIndex}`}
                                 type={tileType}
                                 isPlayer={isPlayer}
                                 playerSide={playerSide}
+                                isDoorOpen={isDoorOpen}
                             />
                         );
                     })

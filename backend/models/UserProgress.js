@@ -79,7 +79,7 @@ userProgressSchema.methods.unlockLevel = function (levelId) {
 };
 
 // Method to complete a level
-userProgressSchema.methods.completeLevel = function (levelId, stars, moves, time) {
+userProgressSchema.methods.completeLevel = function (levelId, stars, moves, time, allLevels = []) {
     // Find existing completion
     const existingIndex = this.completedLevels.findIndex(
         cl => cl.levelId === levelId
@@ -105,9 +105,21 @@ userProgressSchema.methods.completeLevel = function (levelId, stars, moves, time
         this.completedLevels.push(newCompletion);
     }
 
-    // Unlock next level (additive)
-    const nextLevel = levelId + 1;
-    this.unlockLevel(nextLevel);
+    // Unlock levels that have this level as their unlock requirement
+    if (allLevels.length > 0) {
+        // Find all levels that should be unlocked by completing this level
+        const levelsToUnlock = allLevels.filter(
+            level => level.unlockRequirement === levelId
+        );
+
+        levelsToUnlock.forEach(level => {
+            this.unlockLevel(level.levelId);
+        });
+    } else {
+        // Fallback to old behavior if no levels provided (backward compatibility)
+        const nextLevel = levelId + 1;
+        this.unlockLevel(nextLevel);
+    }
 
     // Update total stars
     this.totalStars = this.completedLevels.reduce((sum, cl) => sum + cl.stars, 0);

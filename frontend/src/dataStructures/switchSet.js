@@ -94,6 +94,14 @@ export class SwitchManager {
     }
 
     /**
+     * Check if any switches are currently active
+     * @returns {boolean} - True if at least one switch is active
+     */
+    hasActiveSwitches() {
+        return this.activeSwitches.size > 0;
+    }
+
+    /**
      * Check if any of the specified switches are active
      * @param {Array} ids - Array of switch IDs to check
      * @returns {boolean} - True if at least one is active

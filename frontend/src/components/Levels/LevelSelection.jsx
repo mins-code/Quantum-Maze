@@ -143,21 +143,23 @@ const LevelSelection = () => {
                                         ★
                                     </span>
                                 ))}
-                            </div>
 
-                            {/* Completed Badge */}
-                            {level.isCompleted && (
-                                <div className="completed-badge">
-                                    ✓ Completed
-                                </div>
-                            )}
+                                {/* Completed Badge */}
+                                {level.isCompleted && (
+                                    <div className="completed-badge">
+                                        ✓ Completed
+                                    </div>
+                                )}
+                            </div>
 
                             {/* Locked Overlay */}
                             {!isUnlocked && (
                                 <div className="locked-overlay">
                                     <div className="lock-icon">🔒</div>
                                     <p>Locked</p>
-                                    <p className="unlock-hint">Complete Level {level.levelId - 1}</p>
+                                    {level.unlockRequirement > 0 && (
+                                        <p className="unlock-hint">Complete Level {level.unlockRequirement}</p>
+                                    )}
                                 </div>
                             )}
 

@@ -10,10 +10,23 @@ export const TILE_TYPES = {
     WALL: 1,
     GOAL: 2,
     START: 3,
+    // Legacy tile types (for backward compatibility)
     SWITCH: 4,
     DOOR: 5,
-    PORTAL: 6
+    PORTAL: 6,
+    // Extended tile types for numbered switches/doors/portals
+    SWITCH_1: 10, SWITCH_2: 11, SWITCH_3: 12, SWITCH_4: 13, SWITCH_5: 14, SWITCH_6: 15, SWITCH_7: 16,
+    DOOR_1: 20, DOOR_2: 21, DOOR_3: 22, DOOR_4: 23, DOOR_5: 24, DOOR_6: 25, DOOR_7: 26,
+    PORTAL_1: 30, PORTAL_2: 31, PORTAL_3: 32, PORTAL_4: 33, PORTAL_5: 34, PORTAL_6: 35, PORTAL_7: 36
 };
+
+// Helper functions to identify tile types
+export const isSwitch = (tile) => tile >= 10 && tile <= 16 || tile === 4;
+export const isDoor = (tile) => tile >= 20 && tile <= 26 || tile === 5;
+export const isPortal = (tile) => tile >= 30 && tile <= 36 || tile === 6;
+export const getSwitchNumber = (tile) => tile >= 10 && tile <= 16 ? tile - 10 + 1 : 1;
+export const getDoorNumber = (tile) => tile >= 20 && tile <= 26 ? tile - 20 + 1 : 1;
+export const getPortalNumber = (tile) => tile >= 30 && tile <= 36 ? tile - 30 + 1 : 1;
 
 // Individual tile type exports for convenience
 export const EMPTY = TILE_TYPES.EMPTY;
@@ -123,5 +136,11 @@ export default {
     SCORING,
     ANIMATION,
     KEYS,
-    KEY_TO_DIRECTION
+    KEY_TO_DIRECTION,
+    isSwitch,
+    isDoor,
+    isPortal,
+    getSwitchNumber,
+    getDoorNumber,
+    getPortalNumber
 };

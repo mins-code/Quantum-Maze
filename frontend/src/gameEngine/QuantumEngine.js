@@ -33,6 +33,9 @@ import {
     WALL,
     GOAL,
     START,
+    SWITCH,
+    DOOR,
+    PORTAL,
     PLAYER_IDS,
     GAME_STATES,
     DIRECTION_VECTORS
@@ -60,6 +63,10 @@ export class QuantumEngine {
         this.entities = new EntityManager();
         this.moveHistory = new LinkedList();
         this.pathfindingGraph = new MazeGraph();
+
+        // Switch-door pairing maps
+        this.leftSwitchDoorPairs = new Map(); // Maps switch position to door position
+        this.rightSwitchDoorPairs = new Map();
 
         // Game state
         this.currentLevel = null;
@@ -144,6 +151,9 @@ export class QuantumEngine {
             // Build pathfinding graph for hint system
             this._buildPathfindingGraph();
 
+            // Build switch-door pairs
+            this._buildSwitchDoorPairs();
+
             // Reset game state
             this.resetGame();
 
@@ -203,13 +213,15 @@ export class QuantumEngine {
         const leftValid = this._isValidMove(
             leftNewPos.row,
             leftNewPos.col,
-            this.leftMaze
+            this.leftMaze,
+            'left'
         );
 
         const rightValid = this._isValidMove(
             rightNewPos.row,
             rightNewPos.col,
-            this.rightMaze
+            this.rightMaze,
+            'right'
         );
 
         // CRITICAL RULE: Both players must be able to move, or neither moves
@@ -239,6 +251,10 @@ export class QuantumEngine {
             row: this.rightPlayer.row,
             col: this.rightPlayer.col
         });
+
+        // STEP 3.5: Handle tile interactions (switches, portals)
+        this._handleTileInteraction(this.leftPlayer, this.leftMaze, 'left');
+        this._handleTileInteraction(this.rightPlayer, this.rightMaze, 'right');
 
         // STEP 4: Record the move
         this.moveCount++;
@@ -283,17 +299,44 @@ export class QuantumEngine {
      * @param {number} row - Target row
      * @param {number} col - Target column
      * @param {MazeGrid} maze - Maze to check
+     * @param {string} side - 'left' or 'right' to determine which pairing map to use
      * @returns {boolean} - True if valid
      */
-    _isValidMove(row, col, maze) {
+    _isValidMove(row, col, maze, side = 'left') {
         // Check bounds
         if (!isWithinBounds(row, col, maze.rows, maze.cols)) {
             return false;
         }
 
-        // Check if tile is walkable (not a wall)
+        // Check if tile is walkable
         const tile = maze.getTile(row, col);
-        return tile !== WALL;
+
+        // Walls are never walkable
+        if (tile === WALL) {
+            return false;
+        }
+
+        // Handle Doors (Legacy tile 5 or numbered 20-26)
+        if (tile === DOOR || (tile >= 20 && tile <= 26)) {
+            const doorId = getTileId(row, col);
+            const doorNum = tile >= 20 && tile <= 26 ? tile - 20 + 1 : null;
+
+            const pairMap = side === 'left' ? this.leftSwitchDoorPairs : this.rightSwitchDoorPairs;
+
+            // Find which switch unlocks this door
+            for (const [switchId, pairedDoorId] of pairMap.entries()) {
+                if (pairedDoorId === doorId) {
+                    // Check if this switch is activated
+                    return this.switches.isActive(switchId);
+                }
+            }
+
+            // If it's a numbered door but no pairing exists yet, it's locked
+            return false;
+        }
+
+        // All other tiles are walkable
+        return true;
     }
 
     /**
@@ -605,6 +648,130 @@ export class QuantumEngine {
         if (colDiff > 0) return 'RIGHT';
 
         return null;
+    }
+
+    /**
+     * Handle tile interactions (switches, portals)
+     * @private
+     * @param {Object} playerPos - Player position {row, col}
+     * @param {MazeGrid} maze - The maze the player is in
+     * @param {string} side - 'left' or 'right'
+     */
+    _handleTileInteraction(playerPos, maze, side) {
+        const tile = maze.getTile(playerPos.row, playerPos.col);
+
+        // Handle switch activation (Legacy 4 or numbered 10-16)
+        if (tile === SWITCH || (tile >= 10 && tile <= 16)) {
+            const switchId = getTileId(playerPos.row, playerPos.col);
+            this.switches.activate(switchId);
+            console.log(`${side === 'left' ? 'Left' : 'Right'} Switch activated at (${playerPos.row}, ${playerPos.col})`);
+        }
+
+        // Handle portal teleportation (Legacy 6 or numbered 30-36)
+        if (tile === PORTAL || (tile >= 30 && tile <= 36)) {
+            this._handlePortalTeleport(playerPos, maze, side);
+        }
+    }
+
+    /**
+     * Handle portal teleportation
+     * @private
+     * @param {Object} playerPos - Player position {row, col}
+     * @param {MazeGrid} maze - The maze to search for other portal
+     * @param {string} side - 'left' or 'right'
+     */
+    _handlePortalTeleport(playerPos, maze, side) {
+        const currentTile = maze.getTile(playerPos.row, playerPos.col);
+        const isNumberedPortal = currentTile >= 30 && currentTile <= 36;
+
+        // Find the other portal in the maze
+        for (let row = 0; row < maze.rows; row++) {
+            for (let col = 0; col < maze.cols; col++) {
+                // Skip the current portal position
+                if (row === playerPos.row && col === playerPos.col) {
+                    continue;
+                }
+
+                const targetTile = maze.getTile(row, col);
+
+                // Match: either both are legacy PORTAL(6), or both have the same portal number
+                const isMatch = isNumberedPortal
+                    ? targetTile === currentTile
+                    : targetTile === PORTAL;
+
+                if (isMatch) {
+                    console.log(`Portal teleport (${side}): (${playerPos.row}, ${playerPos.col}) -> (${row}, ${col})`);
+
+                    // Update player position
+                    if (side === 'left') {
+                        this.leftPlayer = { row, col };
+                        this.entities.updateEntity(PLAYER_IDS.LEFT, { row, col });
+                    } else {
+                        this.rightPlayer = { row, col };
+                        this.entities.updateEntity(PLAYER_IDS.RIGHT, { row, col });
+                    }
+
+                    return; // Exit after finding match
+                }
+            }
+        }
+    }
+
+    /**
+     * Build switch-door pairs based on position or number
+     * @private
+     */
+    _buildSwitchDoorPairs() {
+        this.leftSwitchDoorPairs.clear();
+        this.rightSwitchDoorPairs.clear();
+
+        const processPairs = (maze, pairMap) => {
+            const switches = [];
+            const doors = [];
+            const numberedSwitches = new Map(); // Num -> {row, col, id}
+            const numberedDoors = new Map();
+
+            for (let row = 0; row < maze.rows; row++) {
+                for (let col = 0; col < maze.cols; col++) {
+                    const tile = maze.getTile(row, col);
+
+                    if (tile === SWITCH || (tile >= 10 && tile <= 16)) {
+                        const switchInfo = { row, col, id: getTileId(row, col) };
+                        if (tile >= 10 && tile <= 16) {
+                            numberedSwitches.set(tile - 10 + 1, switchInfo);
+                        } else {
+                            switches.push(switchInfo);
+                        }
+                    } else if (tile === DOOR || (tile >= 20 && tile <= 26)) {
+                        const doorInfo = { row, col, id: getTileId(row, col) };
+                        if (tile >= 20 && tile <= 26) {
+                            numberedDoors.set(tile - 20 + 1, doorInfo);
+                        } else {
+                            doors.push(doorInfo);
+                        }
+                    }
+                }
+            }
+
+            // Path 1: Pair by explicit number (e.g., Switch 1 -> Door 1)
+            for (const [num, switchInfo] of numberedSwitches.entries()) {
+                if (numberedDoors.has(num)) {
+                    pairMap.set(switchInfo.id, numberedDoors.get(num).id);
+                }
+            }
+
+            // Path 2: Pair legacy switches/doors by scan order
+            for (let i = 0; i < Math.min(switches.length, doors.length); i++) {
+                pairMap.set(switches[i].id, doors[i].id);
+            }
+        };
+
+        processPairs(this.leftMaze, this.leftSwitchDoorPairs);
+        processPairs(this.rightMaze, this.rightSwitchDoorPairs);
+
+        console.log('Switch-Door Pairs Built:');
+        console.log('Left:', Array.from(this.leftSwitchDoorPairs.entries()));
+        console.log('Right:', Array.from(this.rightSwitchDoorPairs.entries()));
     }
 }
 

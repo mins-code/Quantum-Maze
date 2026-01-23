@@ -69,6 +69,9 @@ router.post('/complete/:levelId', protect, async (req, res) => {
             });
         }
 
+        // Get all levels for unlock logic
+        const allLevels = await Level.find({});
+
         // Calculate stars based on moves
         const stars = level.calculateStars(moves);
 
@@ -83,8 +86,8 @@ router.post('/complete/:levelId', protect, async (req, res) => {
             });
         }
 
-        // Complete the level (this also unlocks next level)
-        progress.completeLevel(levelId, stars, moves, time);
+        // Complete the level (this also unlocks levels based on unlockRequirement)
+        progress.completeLevel(levelId, stars, moves, time, allLevels);
         progress.lastPlayedLevel = levelId;
 
         // Save progress
@@ -99,7 +102,6 @@ router.post('/complete/:levelId', protect, async (req, res) => {
                 moves,
                 time,
                 parMoves: level.parMoves,
-                nextLevelUnlocked: levelId + 1,
                 totalStars: progress.totalStars,
                 unlockedLevels: progress.unlockedLevels
             }
