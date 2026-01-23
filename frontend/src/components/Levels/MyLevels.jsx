@@ -65,7 +65,7 @@ const MyLevels = () => {
 
             {levels.length === 0 ? (
                 <div className="empty-state">
-                    <div className="empty-icon">🧩</div>
+                    <div className="empty-icon">💠</div>
                     <h3>No Levels Created Yet</h3>
                     <p>Start your journey as a maze architect!</p>
                     <button className="btn-primary" onClick={() => navigate('/editor')}>
@@ -92,14 +92,14 @@ const MyLevels = () => {
                                 </div>
                             </div>
                             <div className="level-actions">
-                                <button 
+                                <button
                                     className="btn-action btn-edit"
                                     onClick={() => handleEdit(level._id)}
                                     title="Edit Level"
                                 >
                                     ✏️ Edit
                                 </button>
-                                <button 
+                                <button
                                     className="btn-action btn-delete"
                                     onClick={() => handleDelete(level._id, level.name)}
                                     title="Delete Level"

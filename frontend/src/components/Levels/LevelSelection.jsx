@@ -133,24 +133,25 @@ const LevelSelection = () => {
                                 </div>
                             </div>
 
-                            {/* Stars Display */}
-                            <div className="level-stars">
-                                {[1, 2, 3].map(i => (
-                                    <span
-                                        key={i}
-                                        className={`star ${i <= (level.stars || 0) ? 'earned' : ''}`}
-                                    >
-                                        ★
-                                    </span>
-                                ))}
-                            </div>
-
-                            {/* Completed Badge */}
-                            {level.isCompleted && (
-                                <div className="completed-badge">
-                                    ✓ Completed
+                            {/* Footer Row: Stars & Completed Status */}
+                            <div className="level-footer-row">
+                                <div className="level-stars">
+                                    {[1, 2, 3].map(i => (
+                                        <span
+                                            key={i}
+                                            className={`star ${i <= (level.stars || 0) ? 'earned' : ''}`}
+                                        >
+                                            ★
+                                        </span>
+                                    ))}
                                 </div>
-                            )}
+
+                                {level.isCompleted && (
+                                    <div className="completed-badge">
+                                        ✓ COMPLETED
+                                    </div>
+                                )}
+                            </div>
 
                             {/* Locked Overlay */}
                             {!isUnlocked && (
