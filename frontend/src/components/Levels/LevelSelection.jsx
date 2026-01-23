@@ -146,6 +146,18 @@ const LevelSelection = () => {
                                     ))}
                                 </div>
 
+                                {/* Edit Button for Built-in Levels */}
+                                <button
+                                    className="btn-edit-builtin"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        navigate(`/editor/builtin/${level.levelId}`);
+                                    }}
+                                    title="Edit Level"
+                                >
+                                    ✏️
+                                </button>
+
                                 {level.isCompleted && (
                                     <div className="completed-badge">
                                         ✓ COMPLETED

@@ -92,6 +92,15 @@ function App() {
           />
 
           <Route
+            path="/editor/builtin/:builtinId"
+            element={
+              <PrivateRoute>
+                <LevelEditor />
+              </PrivateRoute>
+            }
+          />
+
+          <Route
             path="/settings"
             element={
               <PrivateRoute>

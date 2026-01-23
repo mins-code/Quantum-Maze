@@ -76,6 +76,58 @@ router.get('/:id', protect, async (req, res) => {
 });
 
 /**
+ * @route   PUT /api/levels/:id
+ * @desc    Update a built-in level
+ * @access  Protected
+ */
+router.put('/:id', protect, async (req, res) => {
+    try {
+        const levelId = parseInt(req.params.id);
+        const { name, gridLeft, gridRight, difficulty, parMoves, description } = req.body;
+
+        if (isNaN(levelId)) {
+            return res.status(400).json({
+                success: false,
+                message: 'Invalid level ID'
+            });
+        }
+
+        let level = await Level.findOne({ levelId });
+
+        if (!level) {
+            return res.status(404).json({
+                success: false,
+                message: `Level ${levelId} not found`
+            });
+        }
+
+        // Update fields
+        if (name) level.name = name;
+        if (gridLeft) level.gridLeft = gridLeft;
+        if (gridRight) level.gridRight = gridRight;
+        if (difficulty) level.difficulty = difficulty;
+        if (parMoves) level.parMoves = parMoves;
+        if (description !== undefined) level.description = description;
+
+        await level.save();
+
+        res.status(200).json({
+            success: true,
+            message: 'Level updated successfully',
+            data: level
+        });
+
+    } catch (error) {
+        console.error('Error updating level:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to update level',
+            error: error.message
+        });
+    }
+});
+
+/**
  * @route   POST /api/levels/:id/complete
  * @desc    Mark a level as completed and save score
  * @access  Protected

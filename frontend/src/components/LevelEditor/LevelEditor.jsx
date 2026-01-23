@@ -11,7 +11,7 @@ import './LevelEditor.css';
 import { useNavigate, useParams } from 'react-router-dom';
 
 const LevelEditor = () => {
-    const { id } = useParams(); // Get level ID if editing
+    const { id, builtinId } = useParams(); // Get level ID or Builtin ID
     const navigate = useNavigate();
 
     // State management
@@ -39,12 +39,14 @@ const LevelEditor = () => {
     // Initialize grids or fetch existing level
     useEffect(() => {
         if (id) {
-            fetchLevelData(id);
+            fetchLevelData(id, false);
+        } else if (builtinId) {
+            fetchLevelData(builtinId, true);
         } else {
             // New level - initialize empty grids
             initializeGrids(dimensions.rows, dimensions.cols);
         }
-    }, [id]); // Only run on mount or ID change
+    }, [id, builtinId]); // Only run on mount or ID change
 
     // Helper to initialize empty grids
     const initializeGrids = (rows, cols) => {
@@ -54,17 +56,21 @@ const LevelEditor = () => {
     };
 
     // Fetch existing level data
-    const fetchLevelData = async (levelId) => {
+    const fetchLevelData = async (levelId, isBuiltin) => {
         try {
             setLoading(true);
             const token = localStorage.getItem('token');
-            const response = await fetch(`http://localhost:5000/api/custom-levels/${levelId}`, {
+            const endpoint = isBuiltin 
+                ? `http://localhost:5000/api/levels/${levelId}`
+                : `http://localhost:5000/api/custom-levels/${levelId}`;
+
+            const response = await fetch(endpoint, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const data = await response.json();
 
             if (response.ok) {
-                const { level } = data;
+                const level = isBuiltin ? data.data : data.level;
                 setLevelName(level.name);
                 setDifficulty(level.difficulty);
                 setParMoves(level.parMoves);
@@ -143,11 +149,19 @@ const LevelEditor = () => {
 
         try {
             const token = localStorage.getItem('token');
-            const url = id
-                ? `http://localhost:5000/api/custom-levels/${id}`
-                : 'http://localhost:5000/api/custom-levels';
+            let url, method;
 
-            const method = id ? 'PUT' : 'POST';
+            if (builtinId) {
+                // Update Built-in Level
+                url = `http://localhost:5000/api/levels/${builtinId}`;
+                method = 'PUT';
+            } else {
+                // Custom Level (Create/Update)
+                url = id 
+                    ? `http://localhost:5000/api/custom-levels/${id}`
+                    : 'http://localhost:5000/api/custom-levels';
+                method = id ? 'PUT' : 'POST';
+            }
 
             const response = await fetch(url, {
                 method,
@@ -208,6 +222,14 @@ const LevelEditor = () => {
                             maxLength={100}
                         />
                     </div>
+                    
+                    <button 
+                        className="btn-back"
+                        onClick={() => navigate('/my-levels')}
+                        title="Back to My Levels"
+                    >
+                        ⬅️ Back
+                    </button>
 
                     <div className="control-group">
                         <label>Rows:</label>
