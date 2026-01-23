@@ -7,6 +7,7 @@
 import React, { useState } from 'react';
 import Tile from './Tile';
 import AudioManager from '../../utils/AudioManager';
+import { isTileVisible } from '../../gameEngine/helperUtils';
 import './MazeBoard.css';
 
 const MazeBoard = ({
@@ -91,7 +92,7 @@ const MazeBoard = ({
                 </div>
                 {/* Music Toggle Button - Only show on left board */}
                 {playerSide === 'left' && (
-                    <button 
+                    <button
                         className="music-toggle-btn"
                         onClick={handleMusicToggle}
                         title={isMuted ? 'Unmute Music' : 'Mute Music'}
@@ -123,6 +124,11 @@ const MazeBoard = ({
 
                         const mechanicProps = getMechanicProps(rowIndex, colIndex, tileType);
 
+                        // Fog of War: Check if tile is visible based on player position
+                        const isVisible = playerPosition
+                            ? isTileVisible(rowIndex, colIndex, playerPosition)
+                            : true; // If no player position, show all tiles
+
                         return (
                             <Tile
                                 key={`${rowIndex}-${colIndex}`}
@@ -133,6 +139,7 @@ const MazeBoard = ({
                                 isOpen={mechanicProps.isOpen}
                                 variant={mechanicProps.variant}
                                 isGhost={isGhost}
+                                isFogged={!isVisible}
                             />
                         );
                     })

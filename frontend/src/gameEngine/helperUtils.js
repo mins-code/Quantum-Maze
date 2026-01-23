@@ -7,6 +7,11 @@
 import { DIRECTION_VECTORS, MIRRORED_DIRECTIONS } from "./gameConstants.js";
 
 /**
+ * Visibility radius for Fog of War (in tiles)
+ */
+export const VISIBILITY_RADIUS = 3;
+
+/**
  * Calculate new position based on direction
  * @param {number} row - Current row
  * @param {number} col - Current column
@@ -130,7 +135,23 @@ export function positionsEqual(pos1, pos2) {
   return pos1.row === pos2.row && pos1.col === pos2.col;
 }
 
+/**
+ * Check if a tile is visible based on player position (Fog of War)
+ * @param {number} row - Target tile row
+ * @param {number} col - Target tile column
+ * @param {Object} playerPos - Player position {row, col}
+ * @returns {boolean} - True if tile is visible
+ */
+export function isTileVisible(row, col, playerPos) {
+  // Calculate Euclidean distance for circular visibility
+  const distance = Math.sqrt(
+    Math.pow(row - playerPos.row, 2) + Math.pow(col - playerPos.col, 2)
+  );
+  return distance <= VISIBILITY_RADIUS;
+}
+
 export default {
+  VISIBILITY_RADIUS,
   calculateNewPosition,
   getMirroredDirection,
   isWithinBounds,
@@ -142,4 +163,5 @@ export default {
   parseTileId,
   deepClone,
   positionsEqual,
+  isTileVisible,
 };
