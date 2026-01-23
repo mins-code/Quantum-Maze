@@ -26,6 +26,58 @@ export const DOOR = TILE_TYPES.DOOR;
 export const PORTAL = TILE_TYPES.PORTAL;
 export const COIN = TILE_TYPES.COIN;
 
+// Tile Metadata - For Live Tile Preview Scanner
+export const TILE_METADATA = {
+    [TILE_TYPES.EMPTY]: {
+        name: 'Quantum Floor',
+        description: 'Stable quantum substrate. Safe for traversal.',
+        hazardLevel: 'SAFE',
+        color: '#1a1d2e'
+    },
+    [TILE_TYPES.WALL]: {
+        name: 'Barrier Field',
+        description: 'Impenetrable energy barrier. Blocks all movement.',
+        hazardLevel: 'BLOCKER',
+        color: '#ff0055'
+    },
+    [TILE_TYPES.GOAL]: {
+        name: 'Exit Portal',
+        description: 'Quantum exit gateway. Reach with both entities to complete.',
+        hazardLevel: 'OBJECTIVE',
+        color: '#00ff88'
+    },
+    [TILE_TYPES.START]: {
+        name: 'Spawn Point',
+        description: 'Entity materialization zone. Initial coordinates.',
+        hazardLevel: 'NEUTRAL',
+        color: '#00f3ff'
+    },
+    [TILE_TYPES.SWITCH]: {
+        name: 'Quantum Switch',
+        description: 'Pressure-activated mechanism. Toggles linked door states.',
+        hazardLevel: 'INTERACTIVE',
+        color: '#ffaa00'
+    },
+    [TILE_TYPES.DOOR]: {
+        name: 'Energy Gate',
+        description: 'Switch-controlled barrier. Requires activation to pass.',
+        hazardLevel: 'CONDITIONAL',
+        color: '#bc13fe'
+    },
+    [TILE_TYPES.PORTAL]: {
+        name: 'Wormhole Portal',
+        description: 'Quantum teleportation node. Instantly transports to paired portal.',
+        hazardLevel: 'TELEPORTER',
+        color: '#0066ff'
+    },
+    [TILE_TYPES.COIN]: {
+        name: 'Quantum Coin',
+        description: 'Collectible energy fragment. Bonus objective.',
+        hazardLevel: 'COLLECTIBLE',
+        color: '#ffd700'
+    }
+};
+
 // Direction Constants
 export const DIRECTIONS = {
     UP: 'UP',
@@ -117,6 +169,7 @@ export const KEY_TO_DIRECTION = {
 
 export default {
     TILE_TYPES,
+    TILE_METADATA,
     DIRECTIONS,
     DIRECTION_VECTORS,
     MIRRORED_DIRECTIONS,

@@ -351,3 +351,212 @@
         grid-template-columns: 1fr;
     }
 }
+
+/* Scanner Panel */
+.scanner-panel {
+    background: rgba(15, 17, 25, 0.8);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(0, 243, 255, 0.3);
+    border-radius: 12px;
+    padding: 1.5rem;
+    max-width: 600px;
+    margin: 0 auto;
+    box-shadow: 0 4px 20px rgba(0, 243, 255, 0.1);
+}
+
+.scanner-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid rgba(0, 243, 255, 0.2);
+}
+
+.scanner-icon {
+    font-size: 1.5rem;
+}
+
+.scanner-title {
+    font-family: 'Courier New', monospace;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--neon-cyan);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+}
+
+.scanner-content {
+    min-height: 120px;
+    font-family: 'Courier New', monospace;
+}
+
+/* Idle State */
+.scanner-idle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 2rem;
+    color: rgba(0, 243, 255, 0.5);
+    font-size: 0.95rem;
+    letter-spacing: 1px;
+}
+
+.scanner-cursor {
+    animation: cursorBlink 1s step-end infinite;
+    font-size: 1.2rem;
+}
+
+@keyframes cursorBlink {
+
+    0%,
+    50% {
+        opacity: 1;
+    }
+
+    51%,
+    100% {
+        opacity: 0;
+    }
+}
+
+/* Active State */
+.scanner-active {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.scanner-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.5rem;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 6px;
+    transition: all 0.2s ease;
+}
+
+.scanner-row:hover {
+    background: rgba(0, 243, 255, 0.05);
+}
+
+.scanner-label {
+    font-size: 0.8rem;
+    color: rgba(0, 243, 255, 0.7);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    min-width: 80px;
+    font-weight: 600;
+}
+
+.scanner-tile-name {
+    font-size: 1rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    text-shadow: 0 0 10px currentColor;
+}
+
+.scanner-value {
+    font-size: 0.95rem;
+    color: var(--text-primary);
+    font-weight: 500;
+}
+
+.scanner-hazard {
+    font-size: 0.85rem;
+    font-weight: 700;
+    padding: 0.25rem 0.75rem;
+    border-radius: 4px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.hazard-safe {
+    background: rgba(0, 255, 136, 0.2);
+    color: var(--success);
+    border: 1px solid var(--success);
+}
+
+.hazard-blocker {
+    background: rgba(255, 0, 85, 0.2);
+    color: var(--error);
+    border: 1px solid var(--error);
+}
+
+.hazard-objective {
+    background: rgba(0, 255, 136, 0.2);
+    color: #00ff88;
+    border: 1px solid #00ff88;
+}
+
+.hazard-neutral {
+    background: rgba(0, 243, 255, 0.2);
+    color: var(--neon-cyan);
+    border: 1px solid var(--neon-cyan);
+}
+
+.hazard-interactive {
+    background: rgba(255, 170, 0, 0.2);
+    color: #ffaa00;
+    border: 1px solid #ffaa00;
+}
+
+.hazard-conditional {
+    background: rgba(188, 19, 254, 0.2);
+    color: var(--neon-purple);
+    border: 1px solid var(--neon-purple);
+}
+
+.hazard-teleporter {
+    background: rgba(0, 102, 255, 0.2);
+    color: #0066ff;
+    border: 1px solid #0066ff;
+}
+
+.hazard-collectible {
+    background: rgba(255, 215, 0, 0.2);
+    color: #ffd700;
+    border: 1px solid #ffd700;
+}
+
+.scanner-side {
+    font-size: 0.85rem;
+    font-weight: 700;
+    padding: 0.25rem 0.75rem;
+    border-radius: 4px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.side-left {
+    background: rgba(188, 19, 254, 0.2);
+    color: var(--neon-purple);
+    border: 1px solid var(--neon-purple);
+}
+
+.side-right {
+    background: rgba(0, 243, 255, 0.2);
+    color: var(--neon-cyan);
+    border: 1px solid var(--neon-cyan);
+}
+
+.scanner-analysis {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 0.75rem;
+    background: rgba(0, 0, 0, 0.4);
+    border-radius: 6px;
+    border-left: 3px solid var(--neon-cyan);
+}
+
+.scanner-description {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+    margin: 0;
+    font-style: italic;
+}

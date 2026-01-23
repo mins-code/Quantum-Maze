@@ -7,7 +7,7 @@
 import React from 'react';
 import './Tile.css';
 
-const Tile = ({ type, isPlayer, isGhost, playerSide, isActive, isOpen, variant = 0, isFogged = false, onClick, onMouseEnter }) => {
+const Tile = ({ type, isPlayer, isGhost, playerSide, isActive, isOpen, variant = 0, isFogged = false, onClick, onMouseEnter, onHover }) => {
     // Determine tile class based on type
     const getTileClass = () => {
         const classes = ['tile'];
@@ -66,7 +66,17 @@ const Tile = ({ type, isPlayer, isGhost, playerSide, isActive, isOpen, variant =
     };
 
     return (
-        <div className={getTileClass()} onClick={onClick} onMouseEnter={onMouseEnter}>
+        <div
+            className={getTileClass()}
+            onClick={onClick}
+            onMouseEnter={() => {
+                if (onMouseEnter) onMouseEnter();
+                if (onHover) onHover();
+            }}
+            onMouseLeave={() => {
+                if (onHover) onHover(null);
+            }}
+        >
             {isPlayer && (
                 <div className="player-indicator">
                     <div className="player-core"></div>

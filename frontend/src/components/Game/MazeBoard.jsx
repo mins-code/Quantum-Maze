@@ -21,6 +21,7 @@ const MazeBoard = ({
     isEditor = false,
     onTileClick = null,
     onTileEnter = null,
+    onTileHover = null,
     isShaking = false
 }) => {
     const [isMuted, setIsMuted] = useState(false);
@@ -146,6 +147,18 @@ const MazeBoard = ({
                                 isFogged={!isVisible}
                                 onClick={isEditor && onTileClick ? () => onTileClick(rowIndex, colIndex) : undefined}
                                 onMouseEnter={isEditor && onTileEnter ? () => onTileEnter(rowIndex, colIndex) : undefined}
+                                onHover={onTileHover ? (data) => {
+                                    if (data === null) {
+                                        onTileHover(null);
+                                    } else {
+                                        onTileHover({
+                                            type: tileType,
+                                            row: rowIndex,
+                                            col: colIndex,
+                                            side: playerSide === 'left' ? 'LEFT' : 'RIGHT'
+                                        });
+                                    }
+                                } : undefined}
                             />
                         );
                     })

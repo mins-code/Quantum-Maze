@@ -10,7 +10,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import MazeBoard from './MazeBoard';
 import VictoryModal from './VictoryModal';
 import QuantumEngine from '../../gameEngine/QuantumEngine';
-import { KEY_TO_DIRECTION } from '../../gameEngine/gameConstants';
+import { KEY_TO_DIRECTION, TILE_METADATA } from '../../gameEngine/gameConstants';
 import api, { submitScore, fetchBestReplay } from '../../utils/api';
 import Legend from './Legend';
 import AudioManager from '../../utils/AudioManager';
@@ -51,6 +51,7 @@ const GameLevel = () => {
     const [levelData, setLevelData] = useState(null);
     const [ghostPos, setGhostPos] = useState(null);
     const [isShaking, setIsShaking] = useState(false);
+    const [scannerData, setScannerData] = useState(null);
 
     // Fetch and initialize level
     useEffect(() => {
@@ -332,6 +333,19 @@ const GameLevel = () => {
         );
     };
 
+    // Handle tile hover for scanner
+    const handleTileHover = (data) => {
+        if (data === null) {
+            setScannerData(null);
+        } else {
+            const metadata = TILE_METADATA[data.type];
+            setScannerData({
+                ...data,
+                ...metadata
+            });
+        }
+    };
+
     if (loading) {
         return (
             <div className="game-level-loading">
@@ -403,6 +417,56 @@ const GameLevel = () => {
                 </div>
             </div>
 
+            {/* Scanner Panel */}
+            <div className="scanner-panel">
+                <div className="scanner-header">
+                    <span className="scanner-icon">🔍</span>
+                    <span className="scanner-title">TILE SCANNER</span>
+                </div>
+                <div className="scanner-content">
+                    {!scannerData ? (
+                        <div className="scanner-idle">
+                            <span className="scanner-text">SCANNING... NO TARGET</span>
+                            <span className="scanner-cursor">_</span>
+                        </div>
+                    ) : (
+                        <div className="scanner-active">
+                            <div className="scanner-row">
+                                <span className="scanner-label">TARGET:</span>
+                                <span
+                                    className="scanner-tile-name"
+                                    style={{ color: scannerData.color }}
+                                >
+                                    {scannerData.name}
+                                </span>
+                            </div>
+                            <div className="scanner-row">
+                                <span className="scanner-label">COORDS:</span>
+                                <span className="scanner-value">
+                                    [X:{scannerData.col}, Y:{scannerData.row}]
+                                </span>
+                            </div>
+                            <div className="scanner-row">
+                                <span className="scanner-label">STATUS:</span>
+                                <span className={`scanner-hazard hazard-${scannerData.hazardLevel.toLowerCase()}`}>
+                                    {scannerData.hazardLevel}
+                                </span>
+                            </div>
+                            <div className="scanner-row">
+                                <span className="scanner-label">SIDE:</span>
+                                <span className={`scanner-side side-${scannerData.side.toLowerCase()}`}>
+                                    {scannerData.side}
+                                </span>
+                            </div>
+                            <div className="scanner-analysis">
+                                <span className="scanner-label">ANALYSIS:</span>
+                                <p className="scanner-description">{scannerData.description}</p>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            </div>
+
             {/* Message Display */}
             {message && (
                 <div className={`game-message ${gameState.hasWon ? 'win' : ''}`}>
@@ -421,6 +485,7 @@ const GameLevel = () => {
                     activeSwitches={stats.activeSwitches}
                     ghostPos={ghostPos?.left}
                     isShaking={isShaking}
+                    onTileHover={handleTileHover}
                 />
 
                 <div className="boards-divider">
@@ -440,6 +505,7 @@ const GameLevel = () => {
                     activeSwitches={stats.activeSwitches}
                     ghostPos={ghostPos?.right}
                     isShaking={isShaking}
+                    onTileHover={handleTileHover}
                 />
             </div>
 

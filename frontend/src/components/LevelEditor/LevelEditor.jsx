@@ -60,7 +60,7 @@ const LevelEditor = () => {
         try {
             setLoading(true);
             const token = localStorage.getItem('token');
-            const endpoint = isBuiltin 
+            const endpoint = isBuiltin
                 ? `http://localhost:5001/api/levels/${levelId}`
                 : `http://localhost:5001/api/custom-levels/${levelId}`;
 
@@ -157,7 +157,7 @@ const LevelEditor = () => {
                 method = 'PUT';
             } else {
                 // Custom Level (Create/Update)
-                url = id 
+                url = id
                     ? `http://localhost:5001/api/custom-levels/${id}`
                     : `http://localhost:5001/api/custom-levels`;
                 method = id ? 'PUT' : 'POST';
@@ -212,6 +212,14 @@ const LevelEditor = () => {
             {/* Top Bar */}
             <div className="editor-topbar">
                 <div className="editor-controls">
+                    <button
+                        className="btn-back"
+                        onClick={() => navigate('/my-levels')}
+                        title="Back to My Levels"
+                    >
+                        ← Back
+                    </button>
+
                     <div className="control-group">
                         <label>Level Name:</label>
                         <input
@@ -222,14 +230,6 @@ const LevelEditor = () => {
                             maxLength={100}
                         />
                     </div>
-                    
-                    <button 
-                        className="btn-back"
-                        onClick={() => navigate('/my-levels')}
-                        title="Back to My Levels"
-                    >
-                        ⬅️ Back
-                    </button>
 
                     <div className="control-group">
                         <label>Rows:</label>
