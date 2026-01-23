@@ -60,6 +60,8 @@ class AudioManager {
             return;
         }
 
+        this.isPlaying = true;
+
         try {
             // Start both tracks at the same time to keep them in sync
             await Promise.all([
@@ -67,10 +69,29 @@ class AudioManager {
                 this.intenseTrack.play()
             ]);
 
-            this.isPlaying = true;
-            console.log('[AudioManager] Playback started');
+            // Check if we were stopped while waiting for the promise
+            if (!this.isPlaying) {
+                this.baseTrack.pause();
+                this.intenseTrack.pause();
+                this.baseTrack.currentTime = 0;
+                this.intenseTrack.currentTime = 0;
+            } else {
+                console.log('[AudioManager] Playback started');
+            }
         } catch (error) {
-            console.error('[AudioManager] Error starting playback:', error);
+            const isAbort = error.name === 'AbortError';
+
+            // If the error is an abort/interrupt error from calling pause(), it's expected
+            if (!isAbort) {
+                console.error('[AudioManager] Error starting playback:', error);
+            }
+            
+            // Only reset flag if it wasn't an abort error (e.g. autoplay prevention, network error)
+            // Abort errors usually mean we were stopped/paused intentionally or superceded by a new request.
+            // If we reset on AbortError, we might accidentally clear the flag set by a subsequent play() call.
+            if (!isAbort && this.isPlaying) {
+                this.isPlaying = false;
+            }
         }
     }
 
@@ -78,9 +99,8 @@ class AudioManager {
      * Stop and reset both tracks
      */
     stop() {
-        if (!this.isPlaying) {
-            return;
-        }
+        // Always force stop, regardless of isPlaying flag, to handle race conditions
+        this.isPlaying = false;
 
         // Pause both tracks
         this.baseTrack.pause();
@@ -90,7 +110,6 @@ class AudioManager {
         this.baseTrack.currentTime = 0;
         this.intenseTrack.currentTime = 0;
 
-        this.isPlaying = false;
         console.log('[AudioManager] Playback stopped');
     }
 
