@@ -44,6 +44,11 @@ const userSchema = new mongoose.Schema({
         type: String,
         default: 'https://api.dicebear.com/7.x/avataaars/svg?seed=default'
     },
+    bio: {
+        type: String,
+        maxlength: [150, 'Bio cannot exceed 150 characters'],
+        default: ''
+    },
     createdAt: {
         type: Date,
         default: Date.now
@@ -92,6 +97,7 @@ userSchema.methods.getPublicProfile = function () {
         username: this.username,
         email: this.email,
         avatar: this.avatar,
+        bio: this.bio,
         totalScore: this.totalScore,
         levelsCompleted: this.levelsCompleted,
         totalStars: this.totalStars,

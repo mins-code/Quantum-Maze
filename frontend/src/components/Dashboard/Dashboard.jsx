@@ -7,15 +7,17 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import api from '../../utils/api';
+import Avatar from '../Shared/Avatar';
 import './Dashboard.css';
 
 const Dashboard = () => {
-    const { user, logout } = useAuth();
+    const { user, logout, refreshUser } = useAuth();
     const navigate = useNavigate();
     const [progress, setProgress] = useState(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
+        if (refreshUser) refreshUser();
         fetchUserProgress();
     }, []);
 
@@ -111,9 +113,9 @@ const Dashboard = () => {
                 <div className="header-content">
                     <h1 className="glitch">Quantum Maze</h1>
                     <div className="user-info">
-                        <img
-                            src={user?.avatar || 'https://api.dicebear.com/7.x/avataaars/svg?seed=default'}
-                            alt="Avatar"
+                        <Avatar
+                            seed={user?.avatar}
+                            size="md"
                             className="user-avatar"
                         />
                         <div className="user-details">

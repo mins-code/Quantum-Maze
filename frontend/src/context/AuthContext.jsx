@@ -138,6 +138,27 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
+    // Refresh user data from server
+    const refreshUser = async () => {
+        try {
+            const response = await api.get('/auth/verify');
+            if (response.data.success) {
+                const refreshedUser = response.data.user;
+
+                // Update localStorage
+                localStorage.setItem('user', JSON.stringify(refreshedUser));
+
+                // Update state
+                setUser(refreshedUser);
+                setIsAuthenticated(true);
+                return { success: true, user: refreshedUser };
+            }
+        } catch (error) {
+            console.error('Error refreshing user:', error);
+            return { success: false, error };
+        }
+    };
+
     const value = {
         user,
         loading,
@@ -145,7 +166,8 @@ export const AuthProvider = ({ children }) => {
         login,
         signup,
         logout,
-        updateProfile
+        updateProfile,
+        refreshUser
     };
 
     return (
