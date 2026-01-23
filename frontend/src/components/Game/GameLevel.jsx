@@ -7,6 +7,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 import MazeBoard from './MazeBoard';
 import VictoryModal from './VictoryModal';
 import QuantumEngine from '../../gameEngine/QuantumEngine';
@@ -20,6 +21,7 @@ import './GameLevel.css';
 const GameLevel = () => {
     const { id } = useParams();
     const navigate = useNavigate();
+    const { user } = useAuth();
     const engineRef = useRef(null);
 
     const [gameState, setGameState] = useState({
@@ -506,6 +508,7 @@ const GameLevel = () => {
                     ghostPos={ghostPos?.left}
                     isShaking={isShaking}
                     onTileHover={handleTileHover}
+                    playerAvatar={user?.avatar}
                 />
 
                 <div className="boards-divider">
@@ -526,6 +529,7 @@ const GameLevel = () => {
                     ghostPos={ghostPos?.right}
                     isShaking={isShaking}
                     onTileHover={handleTileHover}
+                    playerAvatar={user?.avatar}
                 />
             </div>
 

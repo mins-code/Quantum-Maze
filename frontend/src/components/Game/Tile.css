@@ -255,6 +255,20 @@
     z-index: 10;
 }
 
+.player-avatar {
+    width: 80%;
+    height: 80%;
+    border-radius: 50%;
+    z-index: 10;
+    object-fit: cover;
+    animation: bounce 0.5s infinite alternate;
+}
+
+@keyframes bounce {
+    from { transform: translateY(0); }
+    to { transform: translateY(-5px); }
+}
+
 .player-indicator {
     position: absolute;
     top: 50%;

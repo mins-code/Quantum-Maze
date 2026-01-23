@@ -225,7 +225,8 @@
 }
 
 .form-input,
-.form-textarea {
+.form-textarea,
+.form-select {
     width: 100%;
     background: rgba(0, 0, 0, 0.2);
     border: 1px solid rgba(0, 243, 255, 0.2);
@@ -237,13 +238,19 @@
     transition: all 0.3s ease;
 }
 
+.form-select option {
+    background: #0a0e27;
+    color: #fff;
+}
+
 .form-textarea {
     min-height: 100px;
     resize: vertical;
 }
 
 .form-input:focus,
-.form-textarea:focus {
+.form-textarea:focus,
+.form-select:focus {
     outline: none;
     border-color: var(--neon-cyan);
     box-shadow: 0 0 10px rgba(0, 243, 255, 0.2);

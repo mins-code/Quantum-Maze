@@ -8,7 +8,7 @@ import React from 'react';
 import { TILE_TYPES, SCHRODINGER } from '../../gameEngine/gameConstants';
 import './Tile.css';
 
-const Tile = ({ type, isPlayer, isGhost, playerSide, isActive, isOpen, variant = 0, isFogged = false, currentMoveCount = 0, onClick, onMouseEnter, onHover }) => {
+const Tile = ({ type, isPlayer, isGhost, playerSide, isActive, isOpen, variant = 0, isFogged = false, currentMoveCount = 0, onClick, onMouseEnter, onHover, avatarUrl }) => {
     // Determine tile class based on type
     const getTileClass = () => {
         const classes = ['tile'];
@@ -101,8 +101,14 @@ const Tile = ({ type, isPlayer, isGhost, playerSide, isActive, isOpen, variant =
         >
             {isPlayer && (
                 <div className="player-indicator">
-                    <div className="player-core"></div>
-                    <div className="player-glow"></div>
+                    {avatarUrl ? (
+                        <img src={avatarUrl} alt="Avatar" className="player-avatar" />
+                    ) : (
+                        <>
+                            <div className="player-core"></div>
+                            <div className="player-glow"></div>
+                        </>
+                    )}
                 </div>
             )}
 

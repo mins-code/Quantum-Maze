@@ -27,16 +27,37 @@ const EditProfile = () => {
     const [formData, setFormData] = useState({
         name: '',
         bio: '',
-        avatar: ''
+        avatar: '',
+        avatarStyle: 'avataaars'
     });
+
+    // Available Avatar Styles
+    const avatarStyles = [
+        { value: 'avataaars', label: 'Human' },
+        { value: 'bottts', label: 'Robot' },
+        { value: 'croodles', label: 'Doodle' },
+        { value: 'thumbs', label: 'Fun Emoji' },
+        { value: 'identicon', label: 'Abstract' }
+    ];
 
     // Initialize form data from user context
     useEffect(() => {
         if (user) {
+            let initialStyle = 'avataaars';
+            if (user.avatar) {
+                // Try to extract style from existing URL
+                // Format: https://api.dicebear.com/7.x/${style}/svg?seed=${seed}
+                const match = user.avatar.match(/7\.x\/([^/]+)\/svg/);
+                if (match && match[1]) {
+                    initialStyle = match[1];
+                }
+            }
+
             setFormData({
                 name: user.name || '',
                 bio: user.bio || '',
-                avatar: user.avatar || ''
+                avatar: user.avatar || '',
+                avatarStyle: initialStyle
             });
         }
     }, [user]);
@@ -44,16 +65,28 @@ const EditProfile = () => {
     // Handle input changes
     const handleChange = (e) => {
         const { name, value } = e.target;
-        setFormData(prev => ({
-            ...prev,
-            [name]: value
-        }));
+        
+        if (name === 'avatarStyle') {
+            // Immediately update avatar when style changes
+            const randomString = Math.random().toString(36).substring(7);
+            const newAvatar = `https://api.dicebear.com/7.x/${value}/svg?seed=${randomString}`;
+            setFormData(prev => ({
+                ...prev,
+                avatarStyle: value,
+                avatar: newAvatar
+            }));
+        } else {
+            setFormData(prev => ({
+                ...prev,
+                [name]: value
+            }));
+        }
     };
 
     // Randomize Avatar
     const handleRandomizeAvatar = () => {
         const randomString = Math.random().toString(36).substring(7);
-        const newAvatar = `https://api.dicebear.com/7.x/avataaars/svg?seed=${randomString}`;
+        const newAvatar = `https://api.dicebear.com/7.x/${formData.avatarStyle}/svg?seed=${randomString}`;
         setFormData(prev => ({
             ...prev,
             avatar: newAvatar
@@ -78,7 +111,14 @@ const EditProfile = () => {
             return;
         }
 
-        const result = await updateProfile(formData);
+        // Exclude avatarStyle from the data sent to backend if it doesn't expect it
+        // but we just need to save the avatar URL which is already updated in formData.avatar
+        const { avatarStyle, ...profileData } = formData;
+
+        const result = await updateProfile({
+            ...profileData,
+            avatar: formData.avatar // Ensure latest avatar is sent
+        });
 
         if (result.success) {
             setSuccessMessage('Profile updated successfully!');
@@ -94,10 +134,19 @@ const EditProfile = () => {
     const handleCancel = () => {
         // Reset form to current user data
         if (user) {
+            let initialStyle = 'avataaars';
+            if (user.avatar) {
+                const match = user.avatar.match(/7\.x\/([^/]+)\/svg/);
+                if (match && match[1]) {
+                    initialStyle = match[1];
+                }
+            }
+            
             setFormData({
                 name: user.name || '',
                 bio: user.bio || '',
-                avatar: user.avatar || ''
+                avatar: user.avatar || '',
+                avatarStyle: initialStyle
             });
         }
         setIsEditing(false);
@@ -134,9 +183,11 @@ const EditProfile = () => {
                         </div>
 
                         {isEditing && (
-                            <button className="randomize-btn" onClick={handleRandomizeAvatar}>
-                                🎲 Randomize Avatar
-                            </button>
+                            <div className="avatar-controls">
+                                <button className="randomize-btn" onClick={handleRandomizeAvatar}>
+                                    🎲 Randomize
+                                </button>
+                            </div>
                         )}
 
                         {!isEditing ? (
@@ -152,6 +203,21 @@ const EditProfile = () => {
                             </>
                         ) : (
                             <div className="edit-form" style={{ marginTop: '1.5rem' }}>
+                                <div className="form-group">
+                                    <label className="form-label">Avatar Style</label>
+                                    <select
+                                        name="avatarStyle"
+                                        value={formData.avatarStyle}
+                                        onChange={handleChange}
+                                        className="form-select"
+                                    >
+                                        {avatarStyles.map(style => (
+                                            <option key={style.value} value={style.value}>
+                                                {style.label}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
                                 <div className="form-group">
                                     <label className="form-label">Name</label>
                                     <input
