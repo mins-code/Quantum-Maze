@@ -5,28 +5,14 @@
 .profile-container {
     min-height: 100vh;
     padding: 2rem;
-    background: #0a0e27;
+    /* Removed custom background to inherit global gradient */
     position: relative;
     display: flex;
     justify-content: center;
     align-items: center;
 }
 
-/* Maze Grid Background Pattern (Same as Leaderboard) */
-.profile-container::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-image:
-        linear-gradient(rgba(0, 243, 255, 0.05) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(0, 243, 255, 0.05) 1px, transparent 1px);
-    background-size: 50px 50px;
-    pointer-events: none;
-    z-index: 0;
-}
+/* Removed custom grid pattern - using global grid from index.css */
 
 .profile-content {
     position: relative;

@@ -57,7 +57,12 @@ const MyLevels = () => {
     return (
         <div className="my-levels-container">
             <header className="page-header">
-                <h1>My Custom Levels</h1>
+                <div className="header-left">
+                    <button className="back-btn" onClick={() => navigate('/')}>
+                        ← Back
+                    </button>
+                    <h1>My Custom Levels</h1>
+                </div>
                 <button className="btn-create-new" onClick={() => navigate('/editor')}>
                     ➕ Create New
                 </button>

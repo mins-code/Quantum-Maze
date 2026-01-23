@@ -5,25 +5,11 @@
 .leaderboard-container {
     min-height: 100vh;
     padding: 2rem;
-    background: #0a0e27;
+    /* Removed custom background to inherit global gradient */
     position: relative;
 }
 
-/* Maze Grid Background Pattern */
-.leaderboard-container::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-image:
-        linear-gradient(rgba(0, 243, 255, 0.1) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(0, 243, 255, 0.1) 1px, transparent 1px);
-    background-size: 50px 50px;
-    pointer-events: none;
-    z-index: 0;
-}
+/* Removed custom grid pattern - using global grid from index.css */
 
 .leaderboard-container>* {
     position: relative;
