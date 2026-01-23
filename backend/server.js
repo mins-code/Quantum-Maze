@@ -14,6 +14,12 @@ dotenv.config();
 // Initialize Express app
 const app = express();
 
+// Global Request Logger (MOVED TO TOP)
+app.use((req, res, next) => {
+    console.log(`🌍 [${new Date().toISOString()}] INCOMING: ${req.method} ${req.url}`);
+    next();
+});
+
 // Middleware
 app.use(cors());
 app.use(express.json({ limit: '50mb' }));
@@ -63,6 +69,7 @@ const customLevelsRoutes = require('./routes/customLevels');
 app.use('/api/auth', authRoutes);
 app.use('/api/game', gameRoutes);
 app.use('/api/leaderboard', leaderboardRoutes);
+console.log('👉 Registering /api/levels routes');
 app.use('/api/levels', levelsRoutes);
 app.use('/api/progress', progressRoutes);
 app.use('/api/custom-levels', customLevelsRoutes);

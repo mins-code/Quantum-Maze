@@ -81,8 +81,10 @@ router.get('/:id', protect, async (req, res) => {
  * @access  Protected
  */
 router.put('/:id', protect, async (req, res) => {
+    console.log('👉 PUT /api/levels/:id HIT', req.params.id);
     try {
         const levelId = parseInt(req.params.id);
+        console.log('👉 Parsing levelId:', levelId);
         const { name, gridLeft, gridRight, difficulty, parMoves, description } = req.body;
 
         if (isNaN(levelId)) {
