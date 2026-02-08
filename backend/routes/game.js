@@ -66,27 +66,59 @@ router.get('/levels/:levelId', async (req, res) => {
 
 /**
  * @route   POST /api/game/score
- * @desc    Submit score for a level
+ * @desc    Submit score for a level (official or custom)
  * @access  Private
  */
 router.post('/score', protect, async (req, res) => {
     try {
-        const { levelId, moves, timeTaken, undoCount, hintsUsed, replayHistory, coinsCollected, maxCoins } = req.body;
+        const { levelId, customLevelId, levelType = 'official', moves, timeTaken, undoCount, hintsUsed, replayHistory, coinsCollected, maxCoins } = req.body;
 
-        if (!levelId || moves === undefined || timeTaken === undefined) {
+        // Validate level identifier based on type
+        if (levelType === 'official' && !levelId) {
             return res.status(400).json({
                 success: false,
-                error: 'Please provide levelId, moves, and timeTaken'
+                error: 'Please provide levelId for official levels'
             });
         }
 
-        // Get level to calculate stars
-        const level = await Level.findByLevelId(levelId);
-        if (!level) {
-            return res.status(404).json({
+        if (levelType === 'custom' && !customLevelId) {
+            return res.status(400).json({
                 success: false,
-                error: 'Level not found'
+                error: 'Please provide customLevelId for custom levels'
             });
+        }
+
+        if (moves === undefined || timeTaken === undefined) {
+            return res.status(400).json({
+                success: false,
+                error: 'Please provide moves and timeTaken'
+            });
+        }
+
+        // Get level to calculate stars and get level name
+        let level, levelName, levelIdentifier;
+
+        if (levelType === 'official') {
+            level = await Level.findByLevelId(levelId);
+            if (!level) {
+                return res.status(404).json({
+                    success: false,
+                    error: 'Level not found'
+                });
+            }
+            levelName = level.name;
+            levelIdentifier = levelId;
+        } else {
+            const CustomLevel = require('../models/CustomLevel');
+            level = await CustomLevel.findById(customLevelId);
+            if (!level) {
+                return res.status(404).json({
+                    success: false,
+                    error: 'Custom level not found'
+                });
+            }
+            levelName = level.name;
+            levelIdentifier = customLevelId;
         }
 
         // Calculate stars
@@ -98,37 +130,63 @@ router.post('/score', protect, async (req, res) => {
             : false;
 
         // Check if user already has a score for this level
-        const existingScore = await Score.getBestScore(req.user._id, levelId);
+        const existingScore = await Score.getBestScore(req.user._id, levelIdentifier, levelType);
 
-        // Only save if this is better than existing score
-        if (!existingScore || stars > existingScore.stars ||
-            (stars === existingScore.stars && timeTaken < existingScore.timeTaken)) {
+        // Determine if we should update the score
+        const isNewBest = !existingScore || stars > existingScore.stars ||
+            (stars === existingScore.stars && timeTaken < existingScore.timeTaken);
 
-            // Update or create best score
+        // Determine if we should update coins (if more coins collected)
+        const shouldUpdateCoins = !existingScore ||
+            (coinsCollected !== undefined && coinsCollected > (existingScore.coinsCollected || 0));
+
+        // Update if it's a new best OR if more coins were collected
+        if (isNewBest || shouldUpdateCoins) {
+            // Prepare update data - keep best score but update coins if better
+            const updateData = {
+                userId: req.user._id,
+                levelType,
+                levelName,
+                moves: isNewBest ? moves : existingScore.moves,
+                timeTaken: isNewBest ? timeTaken : existingScore.timeTaken,
+                stars: isNewBest ? stars : existingScore.stars,
+                undoCount: isNewBest ? (undoCount || 0) : existingScore.undoCount,
+                hintsUsed: isNewBest ? (hintsUsed || 0) : existingScore.hintsUsed,
+                coinsCollected: shouldUpdateCoins ? (coinsCollected || 0) : (existingScore?.coinsCollected || 0),
+                maxCoins: maxCoins || existingScore?.maxCoins || 0,
+                allCoinsCollected: shouldUpdateCoins ? allCoinsCollected : (existingScore?.allCoinsCollected || false),
+                replayHistory: isNewBest ? (replayHistory || []) : (existingScore?.replayHistory || []),
+                completedAt: Date.now()
+            };
+
+            // Add appropriate level ID
+            if (levelType === 'official') {
+                updateData.levelId = levelId;
+            } else {
+                updateData.customLevelId = customLevelId;
+            }
+
+            // Build query for findOneAndUpdate
+            const query = { userId: req.user._id, levelType };
+            if (levelType === 'official') {
+                query.levelId = levelId;
+            } else {
+                query.customLevelId = customLevelId;
+            }
+
+            // Update or create score
             const score = await Score.findOneAndUpdate(
-                { userId: req.user._id, levelId },
-                {
-                    userId: req.user._id,
-                    levelId,
-                    moves,
-                    timeTaken,
-                    stars,
-                    undoCount: undoCount || 0,
-                    hintsUsed: hintsUsed || 0,
-                    coinsCollected: coinsCollected || 0,
-                    maxCoins: maxCoins || 0,
-                    allCoinsCollected,
-                    replayHistory: replayHistory || [],
-                    completedAt: Date.now()
-                },
+                query,
+                updateData,
                 { new: true, upsert: true, setDefaultsOnInsert: true }
             );
 
             return res.status(201).json({
                 success: true,
-                message: 'Score submitted successfully',
+                message: isNewBest ? 'New best score!' : 'Coins updated!',
                 score,
-                isNewBest: true
+                isNewBest,
+                coinsUpdated: shouldUpdateCoins
             });
         }
 
@@ -136,7 +194,8 @@ router.post('/score', protect, async (req, res) => {
             success: true,
             message: 'Score recorded but not a new best',
             existingBest: existingScore,
-            isNewBest: false
+            isNewBest: false,
+            coinsUpdated: false
         });
     } catch (error) {
         console.error('Submit score error:', error);

@@ -100,7 +100,7 @@ const Tile = ({ type, isPlayer, isGhost, playerSide, isActive, isOpen, variant =
             }}
         >
             {isPlayer && (
-                <div className="player-indicator">
+                <div className="player-indicator" style={{ width: '50%', height: '50%' }}>
                     {avatarUrl ? (
                         <img src={avatarUrl} alt="Avatar" className="player-avatar" />
                     ) : (
@@ -146,17 +146,16 @@ const Tile = ({ type, isPlayer, isGhost, playerSide, isActive, isOpen, variant =
             )}
 
             {(type === TILE_TYPES.ONE_WAY_UP ||
-              type === TILE_TYPES.ONE_WAY_DOWN ||
-              type === TILE_TYPES.ONE_WAY_LEFT ||
-              type === TILE_TYPES.ONE_WAY_RIGHT) && (
-                <div className="arrow-gate" style={{
-                    transform: `translate(-50%, -50%) rotate(${
-                        type === TILE_TYPES.ONE_WAY_UP ? '-90deg' :
-                        type === TILE_TYPES.ONE_WAY_DOWN ? '90deg' :
-                        type === TILE_TYPES.ONE_WAY_LEFT ? '180deg' : '0deg'
-                    })`
-                }}>➤</div>
-            )}
+                type === TILE_TYPES.ONE_WAY_DOWN ||
+                type === TILE_TYPES.ONE_WAY_LEFT ||
+                type === TILE_TYPES.ONE_WAY_RIGHT) && (
+                    <div className="arrow-gate" style={{
+                        transform: `translate(-50%, -50%) rotate(${type === TILE_TYPES.ONE_WAY_UP ? '-90deg' :
+                                type === TILE_TYPES.ONE_WAY_DOWN ? '90deg' :
+                                    type === TILE_TYPES.ONE_WAY_LEFT ? '180deg' : '0deg'
+                            })`
+                    }}>➤</div>
+                )}
         </div>
     );
 };

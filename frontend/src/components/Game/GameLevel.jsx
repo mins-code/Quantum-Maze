@@ -406,6 +406,8 @@ const GameLevel = () => {
                 moves={stats.moveCount}
                 parMoves={stats.parMoves}
                 time={stats.elapsedTime}
+                coinsCollected={stats.coinsCollected}
+                totalCoins={stats.totalCoins}
                 levelId={id}
                 onReplay={handleReplay}
                 onClose={handleCloseVictory}

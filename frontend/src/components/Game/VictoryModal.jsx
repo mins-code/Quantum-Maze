@@ -14,6 +14,8 @@ const VictoryModal = ({
     parMoves,
     time,
     levelId,
+    coinsCollected,
+    totalCoins,
     onReplay,
     onClose
 }) => {
@@ -104,6 +106,16 @@ const VictoryModal = ({
                             <div className="stat-info">
                                 <div className="stat-label">Stars Earned</div>
                                 <div className="stat-value">{stars} / 3</div>
+                            </div>
+                        </div>
+
+                        <div className="victory-stat">
+                            <div className="stat-icon">🪙</div>
+                            <div className="stat-info">
+                                <div className="stat-label">Coins</div>
+                                <div className={`stat-value ${coinsCollected === totalCoins && totalCoins > 0 ? 'coins-perfect' : ''}`}>
+                                    {coinsCollected} / {totalCoins}
+                                </div>
                             </div>
                         </div>
                     </div>

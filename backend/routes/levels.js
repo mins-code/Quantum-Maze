@@ -217,4 +217,63 @@ router.get('/difficulty/:difficulty', protect, async (req, res) => {
     }
 });
 
+/**
+ * @route   GET /api/levels/all/combined
+ * @desc    Get all levels (official + custom) for leaderboard selector
+ * @access  Public
+ */
+router.get('/all/combined', async (req, res) => {
+    try {
+        const CustomLevel = require('../models/CustomLevel');
+
+        // Fetch official levels
+        const officialLevels = await Level.find({}).sort({ levelId: 1 }).lean();
+
+        // Fetch active custom levels
+        const customLevels = await CustomLevel.find({ isActive: true })
+            .populate('creatorId', 'username')
+            .sort({ createdAt: -1 })
+            .lean();
+
+        // Format official levels
+        const formattedOfficialLevels = officialLevels.map(level => ({
+            id: level.levelId,
+            name: level.name,
+            type: 'official',
+            difficulty: level.difficulty,
+            parMoves: level.parMoves
+        }));
+
+        // Format custom levels
+        const formattedCustomLevels = customLevels.map(level => ({
+            id: level._id.toString(),
+            name: level.name,
+            type: 'custom',
+            difficulty: level.difficulty,
+            parMoves: level.parMoves,
+            creator: level.creatorId?.username || 'Unknown',
+            plays: level.plays || 0,
+            likes: level.likes || 0
+        }));
+
+        // Combine both
+        const allLevels = [...formattedOfficialLevels, ...formattedCustomLevels];
+
+        res.status(200).json({
+            success: true,
+            count: allLevels.length,
+            officialCount: formattedOfficialLevels.length,
+            customCount: formattedCustomLevels.length,
+            data: allLevels
+        });
+    } catch (error) {
+        console.error('Error fetching combined levels:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to fetch levels',
+            error: error.message
+        });
+    }
+});
+
 module.exports = router;

@@ -260,8 +260,8 @@
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 75%;
-    height: 75%;
+    width: 45% !important;
+    height: 45% !important;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -278,8 +278,13 @@
 }
 
 @keyframes bounce {
-    from { transform: translateY(0); }
-    to { transform: translateY(-5px); }
+    from {
+        transform: translateY(0);
+    }
+
+    to {
+        transform: translateY(-3px);
+    }
 }
 
 .player-core {
@@ -526,11 +531,14 @@
 }
 
 @keyframes arrowPulse {
-    0%, 100% {
+
+    0%,
+    100% {
         opacity: 0.6;
         filter: drop-shadow(0 0 2px #00ccff);
         font-size: 24px;
     }
+
     50% {
         opacity: 1;
         filter: drop-shadow(0 0 8px #00ccff);
@@ -566,13 +574,20 @@
     .tile-wall {
         border-width: 1px;
     }
-    
+
     .arrow-gate {
         font-size: 18px;
     }
-    
+
     @keyframes arrowPulse {
-        0%, 100% { font-size: 18px; }
-        50% { font-size: 20px; }
+
+        0%,
+        100% {
+            font-size: 18px;
+        }
+
+        50% {
+            font-size: 20px;
+        }
     }
 }

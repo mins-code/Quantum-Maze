@@ -13,24 +13,30 @@ const Leaderboard = () => {
     const navigate = useNavigate();
 
     // State Management
-    const [currentLevel, setCurrentLevel] = useState(1);
+    const [currentLevel, setCurrentLevel] = useState('overall'); // Start with overall
     const [sortBy, setSortBy] = useState('time');
     const [leaderboardData, setLeaderboardData] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
-    const [availableLevels, setAvailableLevels] = useState([1, 2, 3, 4]); // Default levels
+    const [availableLevels, setAvailableLevels] = useState([]); // Will include official + custom
 
     // Fetch available levels on mount
     useEffect(() => {
         const fetchLevels = async () => {
             try {
-                const response = await api.get('/game/levels');
+                const response = await api.get('/levels/all/combined');
                 if (response.data.success) {
-                    const levelIds = response.data.levels.map(level => level.levelId);
-                    setAvailableLevels(levelIds);
+                    setAvailableLevels(response.data.data);
                 }
             } catch (err) {
                 console.error('Error fetching levels:', err);
+                // Fallback to default official levels
+                setAvailableLevels([
+                    { id: 1, name: 'Level 1', type: 'official' },
+                    { id: 2, name: 'Level 2', type: 'official' },
+                    { id: 3, name: 'Level 3', type: 'official' },
+                    { id: 4, name: 'Level 4', type: 'official' }
+                ]);
             }
         };
         fetchLevels();
@@ -43,7 +49,16 @@ const Leaderboard = () => {
                 setLoading(true);
                 setError('');
 
-                const response = await api.get(`/leaderboard/${currentLevel}?sortBy=${sortBy}`);
+                let response;
+                if (currentLevel === 'overall') {
+                    // Fetch overall leaderboard
+                    response = await api.get('/leaderboard/overall/rankings');
+                } else {
+                    // Fetch level-specific leaderboard
+                    const levelData = availableLevels.find(l => l.id === currentLevel);
+                    const levelType = levelData?.type || 'official';
+                    response = await api.get(`/leaderboard/${currentLevel}?sortBy=${sortBy}&type=${levelType}`);
+                }
 
                 if (response.data.success) {
                     setLeaderboardData(response.data.data);
@@ -59,8 +74,10 @@ const Leaderboard = () => {
             }
         };
 
-        fetchLeaderboard();
-    }, [currentLevel, sortBy]);
+        if (currentLevel === 'overall' || availableLevels.length > 0) {
+            fetchLeaderboard();
+        }
+    }, [currentLevel, sortBy, availableLevels]);
 
     // Format time in seconds to display format
     const formatTime = (seconds) => {
@@ -89,38 +106,53 @@ const Leaderboard = () => {
             <div className="leaderboard-controls">
                 {/* Level Selector */}
                 <div className="level-selector">
-                    <label className="selector-label">Select Level:</label>
+                    <label className="selector-label">SELECT LEVEL:</label>
                     <div className="level-buttons">
-                        {availableLevels.map(levelId => (
+                        {/* Overall Tab */}
+                        <button
+                            className={`level-btn ${currentLevel === 'overall' ? 'active' : ''}`}
+                            onClick={() => setCurrentLevel('overall')}
+                        >
+                            ⭐ Overall
+                        </button>
+
+                        {/* Official and Custom Levels */}
+                        {availableLevels.map((level) => (
                             <button
-                                key={levelId}
-                                className={`level-btn ${currentLevel === levelId ? 'active' : ''}`}
-                                onClick={() => setCurrentLevel(levelId)}
+                                key={`${level.type}-${level.id}`}
+                                className={`level-btn ${currentLevel === level.id ? 'active' : ''}`}
+                                onClick={() => setCurrentLevel(level.id)}
+                                title={level.type === 'custom' ? `By ${level.creator}` : level.name}
                             >
-                                Level {levelId}
+                                {level.type === 'custom'
+                                    ? `🎨 ${level.name}`
+                                    : `Level ${level.id}`}
                             </button>
                         ))}
                     </div>
                 </div>
 
-                {/* Sort Toggle */}
-                <div className="sort-toggle">
-                    <label className="selector-label">Sort By:</label>
-                    <div className="toggle-buttons">
-                        <button
-                            className={`toggle-btn ${sortBy === 'time' ? 'active' : ''}`}
-                            onClick={() => setSortBy('time')}
-                        >
-                            ⚡ Fastest Time
-                        </button>
-                        <button
-                            className={`toggle-btn ${sortBy === 'moves' ? 'active' : ''}`}
-                            onClick={() => setSortBy('moves')}
-                        >
-                            🎯 Least Moves
-                        </button>
+
+                {/* Sort Toggle - Hide for overall */}
+                {currentLevel !== 'overall' && (
+                    <div className="sort-toggle">
+                        <label className="selector-label">SORT BY:</label>
+                        <div className="toggle-buttons">
+                            <button
+                                className={`toggle-btn ${sortBy === 'time' ? 'active' : ''}`}
+                                onClick={() => setSortBy('time')}
+                            >
+                                ⏱️ Fastest Time
+                            </button>
+                            <button
+                                className={`toggle-btn ${sortBy === 'moves' ? 'active' : ''}`}
+                                onClick={() => setSortBy('moves')}
+                            >
+                                🎯 Least Moves
+                            </button>
+                        </div>
                     </div>
-                </div>
+                )}
             </div>
 
             {/* Leaderboard Table */}
@@ -153,25 +185,36 @@ const Leaderboard = () => {
                                 <tr>
                                     <th className="rank-col">Rank</th>
                                     <th className="player-col">Player</th>
-                                    <th className={`time-col ${sortBy === 'time' ? 'highlight' : ''}`}>
-                                        Time {sortBy === 'time' && '⭐'}
-                                    </th>
-                                    <th className={`moves-col ${sortBy === 'moves' ? 'highlight' : ''}`}>
-                                        Moves {sortBy === 'moves' && '⭐'}
-                                    </th>
-                                    <th className="stars-col">Stars</th>
-                                    <th className="coins-col">Coins</th>
+                                    {currentLevel === 'overall' ? (
+                                        <>
+                                            <th className="stars-col highlight">Total Stars ⭐</th>
+                                            <th className="moves-col">Levels Completed</th>
+                                            <th className="time-col">Avg Time</th>
+                                            <th className="coins-col">Total Coins</th>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <th className={`time-col ${sortBy === 'time' ? 'highlight' : ''}`}>
+                                                Time {sortBy === 'time' && '⭐'}
+                                            </th>
+                                            <th className={`moves-col ${sortBy === 'moves' ? 'highlight' : ''}`}>
+                                                Moves {sortBy === 'moves' && '⭐'}
+                                            </th>
+                                            <th className="stars-col">Stars</th>
+                                            <th className="coins-col">Coins</th>
+                                        </>
+                                    )}
                                 </tr>
                             </thead>
                             <tbody>
-                                {leaderboardData.map((entry) => (
-                                    <tr key={entry.userId} className={`rank-${entry.rank}`}>
+                                {leaderboardData.map((entry, index) => (
+                                    <tr key={entry.userId} className={`rank-${index + 1}`}>
                                         <td className="rank-col">
                                             <div className="rank-badge">
-                                                {entry.rank === 1 && '🥇'}
-                                                {entry.rank === 2 && '🥈'}
-                                                {entry.rank === 3 && '🥉'}
-                                                {entry.rank > 3 && `#${entry.rank}`}
+                                                {index + 1 === 1 && '🥇'}
+                                                {index + 1 === 2 && '🥈'}
+                                                {index + 1 === 3 && '🥉'}
+                                                {index + 1 > 3 && `#${index + 1}`}
                                             </div>
                                         </td>
                                         <td className="player-col">
@@ -184,31 +227,49 @@ const Leaderboard = () => {
                                                 <span className="player-name">{entry.username}</span>
                                             </div>
                                         </td>
-                                        <td className={`time-col ${sortBy === 'time' ? 'highlight' : ''}`}>
-                                            {formatTime(entry.timeTaken)}
-                                        </td>
-                                        <td className={`moves-col ${sortBy === 'moves' ? 'highlight' : ''}`}>
-                                            {entry.moves}
-                                        </td>
-                                        <td className="stars-col">
-                                            <div className="stars-display">
-                                                {[1, 2, 3].map(i => (
-                                                    <span
-                                                        key={i}
-                                                        className={`star ${i <= entry.stars ? 'active' : ''}`}
-                                                    >
-                                                        ★
-                                                    </span>
-                                                ))}
-                                            </div>
-                                        </td>
-                                        <td className="coins-col">
-                                            {entry.allCoinsCollected ? (
-                                                <span className="all-coins">🪙 {entry.coinsCollected}/{entry.maxCoins}</span>
-                                            ) : (
-                                                <span className="some-coins">{entry.coinsCollected}/{entry.maxCoins}</span>
-                                            )}
-                                        </td>
+                                        {currentLevel === 'overall' ? (
+                                            <>
+                                                <td className="stars-col">
+                                                    <div className="stars-display">
+                                                        {'⭐'.repeat(Math.min(entry.totalStars, 5))}
+                                                        <span className="star-count"> {entry.totalStars}</span>
+                                                    </div>
+                                                </td>
+                                                <td className="moves-col">{entry.levelsCompleted}</td>
+                                                <td className="time-col">{formatTime(entry.averageTime)}</td>
+                                                <td className="coins-col">
+                                                    🪙 {entry.totalCoins || 0}
+                                                </td>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <td className={`time-col ${sortBy === 'time' ? 'highlight' : ''}`}>
+                                                    {formatTime(entry.timeTaken)}
+                                                </td>
+                                                <td className={`moves-col ${sortBy === 'moves' ? 'highlight' : ''}`}>
+                                                    {entry.moves}
+                                                </td>
+                                                <td className="stars-col">
+                                                    <div className="stars-display">
+                                                        {[1, 2, 3].map(i => (
+                                                            <span
+                                                                key={i}
+                                                                className={`star ${i <= entry.stars ? 'active' : ''}`}
+                                                            >
+                                                                ★
+                                                            </span>
+                                                        ))}
+                                                    </div>
+                                                </td>
+                                                <td className="coins-col">
+                                                    {entry.allCoinsCollected ? (
+                                                        <span className="all-coins">🪙 {entry.coinsCollected}/{entry.maxCoins}</span>
+                                                    ) : (
+                                                        <span className="some-coins">{entry.coinsCollected}/{entry.maxCoins}</span>
+                                                    )}
+                                                </td>
+                                            </>
+                                        )}
                                     </tr>
                                 ))}
                             </tbody>

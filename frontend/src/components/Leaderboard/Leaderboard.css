@@ -230,7 +230,7 @@
 
 /* Leaderboard Table */
 .leaderboard-table-wrapper {
-    overflow-x: auto;
+    overflow-x: hidden;
 }
 
 .leaderboard-table {
