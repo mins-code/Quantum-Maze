@@ -36,6 +36,7 @@ const LevelEditor = () => {
         { type: TILE_TYPES.DOOR, name: 'Door', icon: '🚪', hasVariants: true },
         { type: TILE_TYPES.PORTAL, name: 'Portal', icon: '🌀' },
         { type: TILE_TYPES.COIN, name: 'Coin', icon: '💰' },
+        { type: TILE_TYPES.SCHRODINGER, name: 'Quantum Flux', icon: '🔮' },
         { type: TILE_TYPES.ONE_WAY_UP, name: 'Up Gate', icon: '⬆️' },
         { type: TILE_TYPES.ONE_WAY_DOWN, name: 'Down Gate', icon: '⬇️' },
         { type: TILE_TYPES.ONE_WAY_LEFT, name: 'Left Gate', icon: '⬅️' },

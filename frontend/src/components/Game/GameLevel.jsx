@@ -537,6 +537,7 @@ const GameLevel = ({ isCustom = false }) => {
                     isShaking={isShaking}
                     onTileHover={handleTileHover}
                     playerAvatar={user?.avatar}
+                    currentMoveCount={gameState.moveCount}
                 />
 
                 <div className="boards-divider">
@@ -558,6 +559,7 @@ const GameLevel = ({ isCustom = false }) => {
                     isShaking={isShaking}
                     onTileHover={handleTileHover}
                     playerAvatar={user?.avatar}
+                    currentMoveCount={gameState.moveCount}
                 />
             </div>
 
