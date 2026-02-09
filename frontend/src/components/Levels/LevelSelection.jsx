@@ -27,7 +27,11 @@ const LevelSelection = () => {
                 const builtinRes = await api.get('/progress/levels');
                 setLevels(builtinRes.data.data);
 
-                // Fetch user scores to map to custom levels
+                // Fetch global custom levels (returns { levels: [], pagination: {} })
+                const customRes = await api.get('/custom-levels');
+                setCustomLevels(customRes.data.levels || []);
+
+                // Fetch user scores to map to custom levels (only if logged in)
                 if (user) {
                     const progressRes = await api.get('/game/progress');
                     // data.progress contains the scores array, not data.data
@@ -41,14 +45,6 @@ const LevelSelection = () => {
                         }
                     });
                     setUserScores(scoreMap);
-
-                    // Fetch custom levels
-                    console.log('Fetching custom levels for user:', user.id);
-                    const customRes = await api.get(`/custom-levels/user/${user.id}`);
-                    console.log('Custom levels response:', customRes.data);
-                    setCustomLevels(customRes.data.levels);
-                } else {
-                    console.log('No user logged in, skipping custom levels');
                 }
 
                 setError('');
@@ -209,7 +205,7 @@ const LevelSelection = () => {
                 {/* Custom Levels Section */}
                 {customLevels.length > 0 && (
                     <>
-                        <h2 className="section-title" style={{ marginTop: '2rem' }}>My Custom Levels</h2>
+                        <h2 className="section-title" style={{ marginTop: '2rem' }}>Custom Levels</h2>
                         <div className="levels-grid">
                             {customLevels.map((level, index) => {
                                 const score = userScores[level._id];
