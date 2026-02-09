@@ -16,11 +16,14 @@ const VictoryModal = ({
     levelId,
     coinsCollected,
     totalCoins,
+    undoCount,
+    hintsUsed,
     onReplay,
     onClose
 }) => {
     const navigate = useNavigate();
     const [showStars, setShowStars] = useState(false);
+    const [showDetails, setShowDetails] = useState(false);
 
     useEffect(() => {
         if (isOpen) {
@@ -119,6 +122,42 @@ const VictoryModal = ({
                             </div>
                         </div>
                     </div>
+
+                    {/* Run Summary Toggle */}
+                    <button
+                        className="run-summary-toggle"
+                        onClick={() => setShowDetails(!showDetails)}
+                    >
+                        {showDetails ? 'Hide Run Details ⬆' : 'View Run Details ⬇'}
+                    </button>
+
+                    {/* Collapsible Run Summary */}
+                    {showDetails && (
+                        <div className="run-summary">
+                            <div className="stat-row">
+                                <span>⏱ Time</span>
+                                <span>{time}s</span>
+                            </div>
+                            <div className="stat-row">
+                                <span>🪜 Moves</span>
+                                <span>{moves} / {parMoves}</span>
+                            </div>
+                            <div className="stat-row">
+                                <span>↩ Undos</span>
+                                <span>{undoCount}</span>
+                            </div>
+                            <div className="stat-row">
+                                <span>💡 Hints</span>
+                                <span>{hintsUsed}</span>
+                            </div>
+                            {coinsCollected > 0 && (
+                                <div className="stat-row">
+                                    <span>🪙 Coins</span>
+                                    <span>{coinsCollected}</span>
+                                </div>
+                            )}
+                        </div>
+                    )}
 
                     {/* Performance Message */}
                     <div className="performance-message">

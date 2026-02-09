@@ -95,6 +95,10 @@ export class QuantumEngine {
         // Coin collection tracking
         this.coinsCollected = 0;
         this.totalCoins = 0;
+
+        // Run stats tracking
+        this.undoCount = 0;
+        this.hintsUsed = 0;
     }
 
     /**
@@ -424,6 +428,7 @@ export class QuantumEngine {
         this._restoreGameState(previousState);
 
         this.moveCount--;
+        this.undoCount++;
 
         return {
             success: true,
@@ -502,6 +507,7 @@ export class QuantumEngine {
             nextPos
         );
 
+        this.hintsUsed++;
         return {
             success: true,
             direction,
@@ -520,6 +526,8 @@ export class QuantumEngine {
 
         // Reset coin collection
         this.coinsCollected = 0;
+        this.undoCount = 0;
+        this.hintsUsed = 0;
 
         // Recalculate total coins from current grid state
         this.totalCoins = 0;
@@ -618,8 +626,11 @@ export class QuantumEngine {
             activeSwitches: this.switches.getActiveSwitches(),
             intensity: this.calculateCurrentIntensity(),
             distanceToGoal: this.getMinDistanceToGoal(),
+            distanceToGoal: this.getMinDistanceToGoal(),
             coinsCollected: this.coinsCollected,
-            totalCoins: this.totalCoins
+            totalCoins: this.totalCoins,
+            undoCount: this.undoCount,
+            hintsUsed: this.hintsUsed
         };
     }
 

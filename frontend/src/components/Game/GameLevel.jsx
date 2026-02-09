@@ -41,7 +41,9 @@ const GameLevel = ({ isCustom = false }) => {
         canRedo: false,
         activeSwitches: [],
         coinsCollected: 0,
-        totalCoins: 0
+        totalCoins: 0,
+        undoCount: 0,
+        hintsUsed: 0
     });
 
     const [message, setMessage] = useState('');
@@ -323,6 +325,7 @@ const GameLevel = ({ isCustom = false }) => {
 
         if (hint.success) {
             setMessage(`💡 Hint: Try moving ${hint.direction}`);
+            updateStats();
             setTimeout(() => setMessage(''), 3000);
         } else {
             setMessage('❌ No path found');
@@ -434,6 +437,8 @@ const GameLevel = ({ isCustom = false }) => {
                 time={stats.elapsedTime}
                 coinsCollected={stats.coinsCollected}
                 totalCoins={stats.totalCoins}
+                undoCount={stats.undoCount}
+                hintsUsed={stats.hintsUsed}
                 levelId={id}
                 onReplay={handleReplay}
                 onClose={handleCloseVictory}
