@@ -175,11 +175,12 @@ export class QuantumEngine {
 
             // Load mechanics
             if (levelData.mechanics) {
-                // Load switches - ensure SwitchManager knows about them if needed, 
-                // but primarily we just need to track their state
+                // Switches are handled dynamically via this.currentLevel.mechanics
+                // No need to initialize SwitchManager with static data
 
                 // Load doors
                 this.doors.clear();
+
                 if (levelData.mechanics.doors) {
                     levelData.mechanics.doors.forEach(door => {
                         const key = getTileId(door.pos.row, door.pos.col);
@@ -191,8 +192,12 @@ export class QuantumEngine {
                 this.portals.clear();
                 if (levelData.mechanics.portals) {
                     levelData.mechanics.portals.forEach(portal => {
+                        // Forward portal (entry -> target)
                         const key = getTileId(portal.pos.row, portal.pos.col);
                         this.portals.set(key, portal.target);
+
+                        // Bidirectional: Set reverse portal if needed (optional, depends on game design)
+                        // For now assuming one-way or explicit pairs in data
                     });
                 }
             }

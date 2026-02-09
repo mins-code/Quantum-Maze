@@ -18,7 +18,7 @@ import AudioManager from '../../utils/AudioManager';
 import confetti from 'canvas-confetti';
 import './GameLevel.css';
 
-const GameLevel = () => {
+const GameLevel = ({ isCustom = false }) => {
     const { id } = useParams();
     const navigate = useNavigate();
     const { user } = useAuth();
@@ -57,25 +57,32 @@ const GameLevel = () => {
 
     // Fetch and initialize level
     useEffect(() => {
-        const fetchAndLoadLevel = async () => {
+        const initGame = async () => {
+            if (!id) return;
+
+            setLoading(true);
+            setError('');
+            setShowVictoryModal(false);
+
             try {
-                setLoading(true);
-                setError('');
-                // Reset victory modal when changing levels
-                setShowVictoryModal(false);
+                // Determine source: Custom vs Built-in
+                let data;
+                if (isCustom) {
+                    const response = await api.get(`/custom-levels/${id}`);
+                    data = response.data.level; // Corrected: Access .level from response
+                } else {
+                    const response = await api.get(`/levels/${id}`);
+                    data = response.data.data || response.data;
+                }
 
-                // Fetch level data from API
-                const response = await api.get(`/levels/${id}`);
-                const data = response.data.data;
-                setLevelData(data);
+                if (!data) throw new Error("Level data not found");
 
-                // Create engine instance
+                // Initialize Engine
                 engineRef.current = new QuantumEngine();
-
-                // Load level
                 const success = engineRef.current.loadLevel(data);
 
                 if (success) {
+                    // Update Component State from Engine
                     setLeftGrid(engineRef.current.leftMaze.getGrid());
                     setRightGrid(engineRef.current.rightMaze.getGrid());
 
@@ -87,10 +94,12 @@ const GameLevel = () => {
                         gameStarted: true
                     });
 
-                    updateStats();
-                    setMessage('Use Arrow Keys or WASD to move. Both players must move together!');
+                    // Update helper states
+                    setLevelData(data);
+                    if (typeof updateStats === 'function') updateStats();
+                    setMessage(data.description || 'Use Arrow Keys or WASD to move. Both players must move together!');
 
-                    // Load and play audio tracks
+                    // Setup Audio
                     AudioManager.load('/music/cyber_ambience.mp3', '/music/cyber_beat.mp3');
                     const audioStarted = await AudioManager.play();
 
@@ -107,20 +116,29 @@ const GameLevel = () => {
                         document.addEventListener('keydown', resumeAudio);
                     }
 
-                    // Load ghost replay data
-                    const replayData = await fetchBestReplay(id);
-                    if (replayData && replayData.length > 0) {
-                        engineRef.current.loadGhostReplay(replayData);
-                        // Set initial ghost position
-                        const initialGhostPos = engineRef.current.getGhostPositions(0);
-                        setGhostPos(initialGhostPos);
-                        console.log('Ghost replay loaded for level', id);
+                    // Handles Ghost Replay (Built-in only)
+                    if (!isCustom) {
+                        try {
+                            const replayData = await fetchBestReplay(id);
+                            if (replayData && replayData.length > 0) {
+                                engineRef.current.loadGhostReplay(replayData);
+                                setGhostPos(engineRef.current.getGhostPositions(0));
+                                console.log('Ghost replay loaded');
+                            } else {
+                                setGhostPos(null);
+                            }
+                        } catch (replayErr) {
+                            console.warn("Ghost replay fetch error", replayErr);
+                            setGhostPos(null);
+                        }
                     } else {
                         setGhostPos(null);
                     }
+
                 } else {
-                    setError('Failed to load level');
+                    setError('Failed to initialize game engine with level data');
                 }
+
             } catch (err) {
                 console.error('Error loading level:', err);
                 setError('Failed to load level. Please try again.');
@@ -129,14 +147,16 @@ const GameLevel = () => {
             }
         };
 
-        fetchAndLoadLevel();
+        if (id) {
+            initGame();
+        }
 
         return () => {
             // Cleanup: Stop audio when component unmounts
             AudioManager.stop();
             engineRef.current = null;
         };
-    }, [id]);
+    }, [id, isCustom]);
 
     // Keyboard input handler
     useEffect(() => {
@@ -174,23 +194,29 @@ const GameLevel = () => {
 
             // Submit score with replay data and coin data
             const scoreResponse = await submitScore(
-                parseInt(id),
+                isCustom ? id : parseInt(id),
                 moves,
                 time,
                 replayHistory,
                 currentStats.coinsCollected,
-                currentStats.totalCoins
+                currentStats.totalCoins,
+                isCustom // Pass isCustom flag
             );
             console.log('Score submitted:', scoreResponse);
 
-            // Also save to progress endpoint
-            const response = await api.post(`/progress/complete/${id}`, {
-                moves,
-                time
-            });
+            // For official levels, save to progress endpoint to unlock next level
+            if (!isCustom) {
+                const response = await api.post(`/progress/complete/${id}`, {
+                    moves,
+                    time
+                });
+                console.log('Level completion saved:', response.data);
+                return response.data;
+            }
 
-            console.log('Level completion saved:', response.data);
-            return response.data;
+            return scoreResponse; // Return score response for custom levels
+
+
         } catch (error) {
             console.error('Error saving level completion:', error);
             // Don't block the victory modal if saving fails
@@ -592,5 +618,4 @@ const GameLevel = () => {
         </div>
     );
 };
-
 export default GameLevel;

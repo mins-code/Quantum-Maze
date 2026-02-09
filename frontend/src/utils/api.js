@@ -69,16 +69,24 @@ api.interceptors.response.use(
  * @param {number} maxCoins - Total coins available in level
  * @returns {Promise} - API response
  */
-export const submitScore = async (levelId, moves, timeTaken, history = [], coinsCollected = 0, maxCoins = 0) => {
+export const submitScore = async (levelId, moves, timeTaken, history = [], coinsCollected = 0, maxCoins = 0, isCustom = false) => {
     try {
-        const response = await api.post('/game/score', {
-            levelId,
+        const payload = {
             moves,
             timeTaken,
             replayHistory: history,
             coinsCollected,
-            maxCoins
-        });
+            maxCoins,
+            levelType: isCustom ? 'custom' : 'official'
+        };
+
+        if (isCustom) {
+            payload.customLevelId = levelId;
+        } else {
+            payload.levelId = levelId;
+        }
+
+        const response = await api.post('/game/score', payload);
         return response.data;
     } catch (error) {
         console.error('Error submitting score:', error);

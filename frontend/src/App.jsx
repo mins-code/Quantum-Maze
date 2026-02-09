@@ -56,6 +56,15 @@ function App() {
           />
 
           <Route
+            path="/play/custom/:id"
+            element={
+              <PrivateRoute>
+                <GameLevel isCustom={true} />
+              </PrivateRoute>
+            }
+          />
+
+          <Route
             path="/leaderboard"
             element={
               <PrivateRoute>

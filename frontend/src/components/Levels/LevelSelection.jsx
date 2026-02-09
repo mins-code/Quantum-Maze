@@ -7,36 +7,68 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../../utils/api';
+import { useAuth } from '../../context/AuthContext';
 import './LevelSelection.css';
 
 const LevelSelection = () => {
     const navigate = useNavigate();
     const [levels, setLevels] = useState([]);
+    const [customLevels, setCustomLevels] = useState([]); // Store custom levels
+    const [userScores, setUserScores] = useState({}); // Map of customLevelId -> score
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
+    const { user } = useAuth(); // Get user to fetch their levels
 
     useEffect(() => {
-        fetchLevelsWithProgress();
-    }, []);
-
-    const fetchLevelsWithProgress = async () => {
-        try {
+        const loadAllLevels = async () => {
             setLoading(true);
-            const response = await api.get('/progress/levels');
-            setLevels(response.data.data);
-            setError('');
-        } catch (err) {
-            console.error('Error fetching levels:', err);
-            setError('Failed to load levels');
-        } finally {
-            setLoading(false);
-        }
+            try {
+                // Fetch built-in levels (already has progress merged)
+                const builtinRes = await api.get('/progress/levels');
+                setLevels(builtinRes.data.data);
+
+                // Fetch user scores to map to custom levels
+                if (user) {
+                    const progressRes = await api.get('/game/progress');
+                    // data.progress contains the scores array, not data.data
+                    const scores = progressRes.data.progress?.scores || [];
+
+                    // Create map for quick lookup: customLevelId -> score
+                    const scoreMap = {};
+                    scores.forEach(score => {
+                        if (score.levelType === 'custom' && score.customLevelId) {
+                            scoreMap[score.customLevelId] = score;
+                        }
+                    });
+                    setUserScores(scoreMap);
+
+                    // Fetch custom levels
+                    console.log('Fetching custom levels for user:', user.id);
+                    const customRes = await api.get(`/custom-levels/user/${user.id}`);
+                    console.log('Custom levels response:', customRes.data);
+                    setCustomLevels(customRes.data.levels);
+                } else {
+                    console.log('No user logged in, skipping custom levels');
+                }
+
+                setError('');
+            } catch (err) {
+                console.error('Error fetching levels:', err);
+                setError('Failed to load levels');
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        loadAllLevels();
+    }, [user]);
+
+    const handlePlayLevel = (levelId) => {
+        navigate(`/play/${levelId}`);
     };
 
-    const handlePlayLevel = (level) => {
-        if (level.levelId === 1 || level.isUnlocked) {
-            navigate(`/play/${level.levelId}`);
-        }
+    const handlePlayCustomLevel = (levelId) => {
+        navigate(`/play/custom/${levelId}`);
     };
 
     const getDifficultyColor = (difficulty) => {
@@ -80,96 +112,173 @@ const LevelSelection = () => {
                 <h1 className="levels-title">Select a Level</h1>
             </div>
 
-            {/* Levels Grid */}
-            <div className="levels-grid">
-                {levels.map((level) => {
-                    const isUnlocked = level.levelId === 1 || level.isUnlocked;
+            <div className="levels-scroll-container">
+                {/* Built-in Levels Section */}
+                <h2 className="section-title">Campaign Levels</h2>
+                <div className="levels-grid">
+                    {levels.map((level) => {
+                        const isUnlocked = level.levelId === 1 || level.isUnlocked;
 
-                    return (
-                        <div
-                            key={level.levelId}
-                            className={`level-card glass-card ${!isUnlocked ? 'locked' : ''}`}
-                            onClick={() => handlePlayLevel(level)}
-                        >
-                            {/* Edit Button (Top Left) */}
-                            <button
-                                className="btn-edit-builtin"
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    navigate(`/editor/builtin/${level.levelId}`);
-                                }}
-                                title="Edit Level"
+                        return (
+                            <div
+                                key={level.levelId}
+                                className={`level-card glass-card ${!isUnlocked ? 'locked' : ''}`}
+                                onClick={() => handlePlayLevel(level.levelId)}
                             >
-                                ✏️
-                            </button>
-
-                            {/* Level Number Badge (Top Right) */}
-                            <div className="level-badge">
-                                <span className="level-number">{level.levelId}</span>
-                            </div>
-
-                            {/* Level Info */}
-                            <div className="level-info">
-                                <h4 className="level-name">{level.name}</h4>
-                                <p className="level-description">{level.description}</p>
-                            </div>
-
-                            {/* Level Stats */}
-                            <div className="level-stats">
-                                <div
-                                    className="difficulty-badge"
-                                    style={{ borderColor: getDifficultyColor(level.difficulty) }}
+                                {/* Edit Button (Top Left) */}
+                                <button
+                                    className="btn-edit-builtin"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        navigate(`/editor/builtin/${level.levelId}`);
+                                    }}
+                                    title="Edit Level"
                                 >
-                                    <span style={{ color: getDifficultyColor(level.difficulty) }}>
-                                        {level.difficulty}
-                                    </span>
-                                </div>
-                                <div className="par-moves">
-                                    <span className="par-label">Par:</span>
-                                    <span className="par-value">{level.parMoves}</span>
-                                </div>
-                            </div>
+                                    ✏️
+                                </button>
 
-                            {/* Footer Row: Stars & Completed Status */}
-                            <div className="level-footer-row">
-                                <div className="level-stars">
-                                    {[1, 2, 3].map(i => (
-                                        <span
-                                            key={i}
-                                            className={`star ${i <= (level.stars || 0) ? 'earned' : ''}`}
-                                        >
-                                            ★
+                                {/* Level Number Badge (Top Right) */}
+                                <div className="level-badge">
+                                    <span className="level-number">{level.levelId}</span>
+                                </div>
+
+                                {/* Level Info */}
+                                <div className="level-info">
+                                    <h4 className="level-name">{level.name}</h4>
+                                    <p className="level-description">{level.description}</p>
+                                </div>
+
+                                {/* Level Stats */}
+                                <div className="level-stats">
+                                    <div
+                                        className="difficulty-badge"
+                                        style={{ borderColor: getDifficultyColor(level.difficulty) }}
+                                    >
+                                        <span style={{ color: getDifficultyColor(level.difficulty) }}>
+                                            {level.difficulty}
                                         </span>
-                                    ))}
+                                    </div>
+                                    <div className="par-moves">
+                                        <span className="par-label">Par:</span>
+                                        <span className="par-value">{level.parMoves}</span>
+                                    </div>
                                 </div>
 
-                                {level.isCompleted && (
-                                    <div className="completed-badge">
-                                        ✓ COMPLETED
+                                {/* Footer Row: Stars & Completed Status */}
+                                <div className="level-footer-row">
+                                    <div className="level-stars">
+                                        {[1, 2, 3].map(i => (
+                                            <span
+                                                key={i}
+                                                className={`star ${i <= (level.stars || 0) ? 'earned' : ''}`}
+                                            >
+                                                ★
+                                            </span>
+                                        ))}
+                                    </div>
+
+                                    {level.isCompleted && (
+                                        <div className="completed-badge">
+                                            ✓ COMPLETED
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* Locked Overlay */}
+                                {!isUnlocked && (
+                                    <div className="locked-overlay">
+                                        <div className="lock-icon">🔒</div>
+                                        <p>Locked</p>
+                                        <p className="unlock-hint">Complete Level {level.levelId - 1}</p>
+                                    </div>
+                                )}
+
+                                {/* Play Button Overlay */}
+                                {isUnlocked && (
+                                    <div className="play-overlay">
+                                        <button className="play-btn">
+                                            ▶ Play
+                                        </button>
                                     </div>
                                 )}
                             </div>
+                        );
+                    })}
+                </div>
 
-                            {/* Locked Overlay */}
-                            {!isUnlocked && (
-                                <div className="locked-overlay">
-                                    <div className="lock-icon">🔒</div>
-                                    <p>Locked</p>
-                                    <p className="unlock-hint">Complete Level {level.levelId - 1}</p>
-                                </div>
-                            )}
+                {/* Custom Levels Section */}
+                {customLevels.length > 0 && (
+                    <>
+                        <h2 className="section-title" style={{ marginTop: '2rem' }}>My Custom Levels</h2>
+                        <div className="levels-grid">
+                            {customLevels.map((level, index) => {
+                                const score = userScores[level._id];
+                                const isCompleted = score && score.completed;
+                                const stars = score ? score.stars : 0;
 
-                            {/* Play Button Overlay */}
-                            {isUnlocked && (
-                                <div className="play-overlay">
-                                    <button className="play-btn">
-                                        ▶ Play
-                                    </button>
-                                </div>
-                            )}
+                                return (
+                                    <div
+                                        key={level._id}
+                                        className="level-card glass-card custom-level-card"
+                                        onClick={() => handlePlayCustomLevel(level._id)}
+                                    >
+                                        {/* Custom Badge with Number */}
+                                        <div className="level-badge custom-badge">
+                                            <span className="level-number">{index + 1}</span>
+                                        </div>
+
+                                        <div className="level-info">
+                                            <h4 className="level-name">{level.name}</h4>
+                                            <p className="level-description">{level.description || "No description"}</p>
+                                        </div>
+
+                                        <div className="level-stats">
+                                            <div
+                                                className="difficulty-badge"
+                                                style={{ borderColor: getDifficultyColor(level.difficulty) }}
+                                            >
+                                                <span style={{ color: getDifficultyColor(level.difficulty) }}>
+                                                    {level.difficulty}
+                                                </span>
+                                            </div>
+                                            {/* Par Moves aligned to right (via flex margin-left auto if needed or just space-between) */}
+                                            <div className="par-moves" style={{ marginLeft: 'auto' }}>
+                                                <span className="par-label">Par:</span>
+                                                <span className="par-value">{level.parMoves}</span>
+                                            </div>
+                                        </div>
+
+                                        {/* Footer Row: Stars & Completed Status (Only if played) */}
+                                        {(isCompleted || stars > 0) && (
+                                            <div className="level-footer-row">
+                                                <div className="level-stars">
+                                                    {[1, 2, 3].map(i => (
+                                                        <span
+                                                            key={i}
+                                                            className={`star ${i <= stars ? 'earned' : ''}`}
+                                                        >
+                                                            ★
+                                                        </span>
+                                                    ))}
+                                                </div>
+
+                                                <div className="completed-badge">
+                                                    ✓ COMPLETED
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        <div className="play-overlay">
+                                            <button className="play-btn">
+                                                ▶ Play
+                                            </button>
+                                        </div>
+                                    </div>
+                                );
+                            })}
                         </div>
-                    );
-                })}
+                    </>
+                )}
             </div>
         </div>
     );

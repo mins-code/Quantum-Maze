@@ -108,9 +108,9 @@ customLevelSchema.index({ likes: -1 });
 customLevelSchema.index({ createdAt: -1 });
 
 // Update the updatedAt timestamp before saving
-customLevelSchema.pre('save', function (next) {
+// Update the updatedAt timestamp before saving
+customLevelSchema.pre('save', async function () {
     this.updatedAt = Date.now();
-    next();
 });
 
 // Method to calculate stars based on moves (same as Level model)

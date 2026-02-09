@@ -20,6 +20,7 @@ const LevelEditor = () => {
     const [gridRight, setGridRight] = useState([]);
     const [selectedTool, setSelectedTool] = useState(TILE_TYPES.WALL); // Default to WALL
     const [levelName, setLevelName] = useState('');
+    const [description, setDescription] = useState('');
     const [difficulty, setDifficulty] = useState('Medium');
     const [parMoves, setParMoves] = useState(10);
     const [loading, setLoading] = useState(false);
@@ -76,6 +77,7 @@ const LevelEditor = () => {
             if (response.ok) {
                 const level = isBuiltin ? data.data : data.level;
                 setLevelName(level.name);
+                setDescription(level.description || '');
                 setDifficulty(level.difficulty);
                 setParMoves(level.parMoves);
 
@@ -134,6 +136,92 @@ const LevelEditor = () => {
         });
     };
 
+    // Helper to extract mechanics from grids
+    const generateMechanics = (leftGrid, rightGrid) => {
+        const switches = [];
+        const doors = [];
+        const portals = [];
+
+        // Scan a grid and collect entities
+        const scanGrid = (grid) => {
+            const gridSwitches = [];
+            const gridDoors = [];
+            const gridPortals = [];
+
+            grid.forEach((row, r) => {
+                row.forEach((tile, c) => {
+                    if (tile === TILE_TYPES.SWITCH) {
+                        gridSwitches.push({ pos: { row: r, col: c } });
+                    } else if (tile === TILE_TYPES.DOOR) {
+                        gridDoors.push({ pos: { row: r, col: c } });
+                    } else if (tile === TILE_TYPES.PORTAL) {
+                        gridPortals.push({ pos: { row: r, col: c } });
+                    }
+                });
+            });
+            return { gridSwitches, gridDoors, gridPortals };
+        };
+
+        const left = scanGrid(leftGrid);
+        const right = scanGrid(rightGrid);
+
+        // Combine findings (giving unique IDs based on index and side?)
+        // Actually, QuantumEngine doesn't care about side usually, just coordinates.
+        // We'll treat them as a single pool or handle based on game logic.
+        // Simple approach: combine all and link sequentially.
+
+        const allSwitches = [...left.gridSwitches, ...right.gridSwitches];
+        const allDoors = [...left.gridDoors, ...right.gridDoors];
+        const allPortals = [...left.gridPortals, ...right.gridPortals];
+
+        // 1. Process Switches
+        allSwitches.forEach((s, index) => {
+            switches.push({
+                id: `switch_${index}`,
+                pos: s.pos,
+                color: 'blue', // Default
+                type: 0
+            });
+        });
+
+        // 2. Process Doors (Link to switches)
+        // Heuristic: Door[i] is controlled by Switch[i % numSwitches]
+        allDoors.forEach((d, index) => {
+            const switchIndex = allSwitches.length > 0 ? index % allSwitches.length : -1;
+            const switchId = switchIndex >= 0 ? `switch_${switchIndex}` : null;
+
+            doors.push({
+                id: `door_${index}`,
+                pos: d.pos,
+                switchId: switchId
+            });
+        });
+
+        // 3. Process Portals (Link keys to targets)
+        // Heuristic: Portal[0] <-> Portal[1], Portal[2] <-> Portal[3]
+        // If odd, last one loops to itself or first?. Let's do bidirectional pairs.
+        for (let i = 0; i < allPortals.length; i += 2) {
+            if (i + 1 < allPortals.length) {
+                const p1 = allPortals[i];
+                const p2 = allPortals[i + 1];
+
+                // P1 targets P2
+                portals.push({
+                    pos: p1.pos,
+                    target: p2.pos
+                });
+
+                // P2 targets P1
+                portals.push({
+                    pos: p2.pos,
+                    target: p1.pos
+                });
+            }
+        }
+
+        return { switches, doors, portals };
+    };
+
     // Save level (Create or Update)
     const handleSaveLevel = async () => {
         if (!levelName.trim()) {
@@ -167,6 +255,9 @@ const LevelEditor = () => {
                 method = id ? 'PUT' : 'POST';
             }
 
+            // Generate mechanics from grid data
+            const mechanics = generateMechanics(gridLeft, gridRight);
+
             const response = await fetch(url, {
                 method,
                 headers: {
@@ -175,11 +266,12 @@ const LevelEditor = () => {
                 },
                 body: JSON.stringify({
                     name: levelName,
+                    description,
                     gridLeft,
                     gridRight,
                     difficulty,
                     parMoves,
-                    mechanics: { switches: [], doors: [], portals: [] }
+                    mechanics // Use generated mechanics
                 })
             });
 
@@ -192,6 +284,7 @@ const LevelEditor = () => {
                     // logical choice: keep editing the newly created level or clear?
                     // Let's clear for now to stay consistent with previous behavior
                     setLevelName('');
+                    setDescription('');
                     initializeGrids(dimensions.rows, dimensions.cols);
                 }
             } else {
@@ -232,6 +325,27 @@ const LevelEditor = () => {
                             onChange={(e) => setLevelName(e.target.value)}
                             placeholder="Enter level name"
                             maxLength={100}
+                        />
+                    </div>
+
+                    <div className="control-group">
+                        <label>Description:</label>
+                        <textarea
+                            value={description}
+                            onChange={(e) => setDescription(e.target.value)}
+                            placeholder="Enter level description"
+                            maxLength={500}
+                            rows={2}
+                            style={{
+                                width: '100%',
+                                padding: '0.5rem',
+                                borderRadius: '4px',
+                                border: '1px solid rgba(255, 255, 255, 0.2)',
+                                background: 'rgba(0, 0, 0, 0.3)',
+                                color: '#fff',
+                                fontFamily: 'inherit',
+                                resize: 'vertical'
+                            }}
                         />
                     </div>
 
