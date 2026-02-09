@@ -142,10 +142,16 @@ export class QuantumEngine {
             this.totalCoins = 0;
             for (let row = 0; row < rows; row++) {
                 for (let col = 0; col < cols; col++) {
-                    if (levelData.gridLeft[row][col] === COIN) {
+                    const leftTile = levelData.gridLeft[row][col];
+                    const rightTile = levelData.gridRight[row][col];
+
+                    const leftType = typeof leftTile === 'object' ? leftTile.type : leftTile;
+                    const rightType = typeof rightTile === 'object' ? rightTile.type : rightTile;
+
+                    if (leftType === COIN) {
                         this.totalCoins++;
                     }
-                    if (levelData.gridRight[row][col] === COIN) {
+                    if (rightType === COIN) {
                         this.totalCoins++;
                     }
                 }
@@ -360,7 +366,8 @@ export class QuantumEngine {
         }
 
         // Check if tile is walkable (not a wall)
-        const tile = maze.getTile(row, col);
+        const tileData = maze.getTile(row, col);
+        const tile = typeof tileData === 'object' ? tileData.type : tileData;
 
         // Wall check
         if (tile === WALL) return false;
@@ -389,7 +396,7 @@ export class QuantumEngine {
             if (door && door.switchId) {
                 return this.switches.isActive(door.switchId);
             }
-            // Default to closed if no data found
+            // Default to closed if no data found (unless door exists without a switch, treat as solid)
             return false;
         }
 
@@ -519,10 +526,16 @@ export class QuantumEngine {
         if (this.leftMaze && this.rightMaze) {
             for (let row = 0; row < this.leftMaze.rows; row++) {
                 for (let col = 0; col < this.leftMaze.cols; col++) {
-                    if (this.leftMaze.getTile(row, col) === COIN) {
+                    const leftTileData = this.leftMaze.getTile(row, col);
+                    const rightTileData = this.rightMaze.getTile(row, col);
+
+                    const leftType = typeof leftTileData === 'object' ? leftTileData.type : leftTileData;
+                    const rightType = typeof rightTileData === 'object' ? rightTileData.type : rightTileData;
+
+                    if (leftType === COIN) {
                         this.totalCoins++;
                     }
-                    if (this.rightMaze.getTile(row, col) === COIN) {
+                    if (rightType === COIN) {
                         this.totalCoins++;
                     }
                 }
@@ -615,7 +628,8 @@ export class QuantumEngine {
      * @private
      */
     _handleMechanics(playerPos, maze) {
-        const tile = maze.getTile(playerPos.row, playerPos.col);
+        const tileData = maze.getTile(playerPos.row, playerPos.col);
+        const tile = typeof tileData === 'object' ? tileData.type : tileData;
         const tileId = getTileId(playerPos.row, playerPos.col);
 
         // Handle Coin Collection
@@ -680,7 +694,9 @@ export class QuantumEngine {
         // Find left player start
         for (let row = 0; row < this.leftMaze.rows; row++) {
             for (let col = 0; col < this.leftMaze.cols; col++) {
-                if (this.leftMaze.getTile(row, col) === START) {
+                const tileData = this.leftMaze.getTile(row, col);
+                const tile = typeof tileData === 'object' ? tileData.type : tileData;
+                if (tile === START) {
                     this.leftPlayer = { row, col };
                     break;
                 }
@@ -690,7 +706,9 @@ export class QuantumEngine {
         // Find right player start
         for (let row = 0; row < this.rightMaze.rows; row++) {
             for (let col = 0; col < this.rightMaze.cols; col++) {
-                if (this.rightMaze.getTile(row, col) === START) {
+                const tileData = this.rightMaze.getTile(row, col);
+                const tile = typeof tileData === 'object' ? tileData.type : tileData;
+                if (tile === START) {
                     this.rightPlayer = { row, col };
                     break;
                 }
@@ -706,7 +724,9 @@ export class QuantumEngine {
         // Find left goal
         for (let row = 0; row < this.leftMaze.rows; row++) {
             for (let col = 0; col < this.leftMaze.cols; col++) {
-                if (this.leftMaze.getTile(row, col) === GOAL) {
+                const tileData = this.leftMaze.getTile(row, col);
+                const tile = typeof tileData === 'object' ? tileData.type : tileData;
+                if (tile === GOAL) {
                     this.leftGoal = { row, col };
                     break;
                 }
@@ -716,7 +736,9 @@ export class QuantumEngine {
         // Find right goal
         for (let row = 0; row < this.rightMaze.rows; row++) {
             for (let col = 0; col < this.rightMaze.cols; col++) {
-                if (this.rightMaze.getTile(row, col) === GOAL) {
+                const tileData = this.rightMaze.getTile(row, col);
+                const tile = typeof tileData === 'object' ? tileData.type : tileData;
+                if (tile === GOAL) {
                     this.rightGoal = { row, col };
                     break;
                 }
@@ -734,7 +756,9 @@ export class QuantumEngine {
         // Add all walkable tiles as nodes
         for (let row = 0; row < this.leftMaze.rows; row++) {
             for (let col = 0; col < this.leftMaze.cols; col++) {
-                const tile = this.leftMaze.getTile(row, col);
+                const tileData = this.leftMaze.getTile(row, col);
+                const tile = typeof tileData === 'object' ? tileData.type : tileData;
+
                 if (tile !== WALL) {
                     const tileId = getTileId(row, col);
                     this.pathfindingGraph.addNode(tileId);
@@ -742,7 +766,8 @@ export class QuantumEngine {
                     // Add edges to adjacent walkable tiles
                     const neighbors = this.leftMaze.getNeighbors(row, col);
                     neighbors.forEach(neighbor => {
-                        if (neighbor.value !== WALL) {
+                        const neighborType = typeof neighbor.value === 'object' ? neighbor.value.type : neighbor.value;
+                        if (neighborType !== WALL) {
                             const neighborId = getTileId(neighbor.row, neighbor.col);
                             this.pathfindingGraph.addEdge(tileId, neighborId);
                         }

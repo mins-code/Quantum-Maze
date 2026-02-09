@@ -42,9 +42,21 @@
 /* Top Bar Controls */
 .editor-controls {
     display: flex;
-    flex-wrap: wrap;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.editor-row {
+    display: flex;
     gap: 2rem;
     align-items: flex-end;
+    flex-wrap: wrap;
+    width: 100%;
+}
+
+.control-group.full-width {
+    flex: 1 1 100%;
+    width: 100%;
 }
 
 .control-group {
@@ -375,5 +387,98 @@
     .editor-controls {
         flex-direction: column;
         align-items: stretch;
+    }
+}
+
+/* Variant Pop-up Styles */
+.variant-popup {
+    position: absolute;
+    bottom: 110%;
+    /* Place above the button */
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(10, 14, 39, 0.95);
+    border: 1px solid var(--neon-cyan, #00f3ff);
+    border-radius: 12px;
+    padding: 1rem;
+    width: max-content;
+    z-index: 100;
+    box-shadow:
+        0 5px 20px rgba(0, 0, 0, 0.5),
+        0 0 15px rgba(0, 243, 255, 0.2);
+    animation: popupFadeIn 0.2s ease-out;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.variant-popup-arrow {
+    position: absolute;
+    bottom: -6px;
+    left: 50%;
+    transform: translateX(-50%) rotate(45deg);
+    width: 12px;
+    height: 12px;
+    background: rgba(10, 14, 39, 0.95);
+    border-right: 1px solid var(--neon-cyan, #00f3ff);
+    border-bottom: 1px solid var(--neon-cyan, #00f3ff);
+}
+
+.variant-popup-label {
+    font-family: var(--font-primary, 'Orbitron', sans-serif);
+    font-size: 0.75rem;
+    color: #fff;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 0.25rem;
+}
+
+.variant-options {
+    display: flex;
+    gap: 0.75rem;
+}
+
+.variant-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 2px solid transparent;
+    /* default transparent border */
+    background: rgba(255, 255, 255, 0.1);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    padding: 0;
+}
+
+.variant-btn:hover {
+    transform: scale(1.1);
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.variant-btn.active {
+    transform: scale(1.15);
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+}
+
+.variant-dot {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    box-shadow: inset 0 0 4px rgba(0, 0, 0, 0.3);
+}
+
+@keyframes popupFadeIn {
+    from {
+        opacity: 0;
+        transform: translate(-50%, 10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translate(-50%, 0);
     }
 }

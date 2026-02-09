@@ -19,6 +19,7 @@ const LevelEditor = () => {
     const [gridLeft, setGridLeft] = useState([]);
     const [gridRight, setGridRight] = useState([]);
     const [selectedTool, setSelectedTool] = useState(TILE_TYPES.WALL); // Default to WALL
+    const [selectedVariant, setSelectedVariant] = useState(0); // 0: Yellow, 1: Cyan, 2: Pink
     const [levelName, setLevelName] = useState('');
     const [description, setDescription] = useState('');
     const [difficulty, setDifficulty] = useState('Medium');
@@ -31,14 +32,20 @@ const LevelEditor = () => {
         { type: TILE_TYPES.WALL, name: 'Wall', icon: '⬛' },
         { type: TILE_TYPES.START, name: 'Start', icon: '🟢' },
         { type: TILE_TYPES.GOAL, name: 'Goal', icon: '🟡' },
-        { type: TILE_TYPES.SWITCH, name: 'Switch', icon: '🔘' },
-        { type: TILE_TYPES.DOOR, name: 'Door', icon: '🚪' },
+        { type: TILE_TYPES.SWITCH, name: 'Switch', icon: '🔘', hasVariants: true },
+        { type: TILE_TYPES.DOOR, name: 'Door', icon: '🚪', hasVariants: true },
         { type: TILE_TYPES.PORTAL, name: 'Portal', icon: '🌀' },
         { type: TILE_TYPES.COIN, name: 'Coin', icon: '💰' },
         { type: TILE_TYPES.ONE_WAY_UP, name: 'Up Gate', icon: '⬆️' },
         { type: TILE_TYPES.ONE_WAY_DOWN, name: 'Down Gate', icon: '⬇️' },
         { type: TILE_TYPES.ONE_WAY_LEFT, name: 'Left Gate', icon: '⬅️' },
         { type: TILE_TYPES.ONE_WAY_RIGHT, name: 'Right Gate', icon: '➡️' }
+    ];
+
+    const VARIANTS = [
+        { id: 0, name: 'Yellow', color: '#ffd700' },
+        { id: 1, name: 'Cyan', color: '#00f3ff' },
+        { id: 2, name: 'Pink', color: '#ff0055' }
     ];
 
     // Initialize grids or fetch existing level
@@ -131,7 +138,16 @@ const LevelEditor = () => {
 
         updateGrid(prev => {
             const newGrid = prev.map(r => [...r]);
-            newGrid[row][col] = selectedTool;
+
+            // If tool supports variants (Switch/Door), store object { type, variant }
+            // Otherwise store just type
+            const toolMeta = TILE_METADATA.find(t => t.type === selectedTool);
+            if (toolMeta?.hasVariants) {
+                newGrid[row][col] = { type: selectedTool, variant: selectedVariant };
+            } else {
+                newGrid[row][col] = selectedTool;
+            }
+
             return newGrid;
         });
     };
@@ -149,12 +165,16 @@ const LevelEditor = () => {
             const gridPortals = [];
 
             grid.forEach((row, r) => {
-                row.forEach((tile, c) => {
-                    if (tile === TILE_TYPES.SWITCH) {
-                        gridSwitches.push({ pos: { row: r, col: c } });
-                    } else if (tile === TILE_TYPES.DOOR) {
-                        gridDoors.push({ pos: { row: r, col: c } });
-                    } else if (tile === TILE_TYPES.PORTAL) {
+                row.forEach((tileData, c) => {
+                    // Normalize tile data (can be int or object)
+                    const tileType = typeof tileData === 'object' ? tileData.type : tileData;
+                    const variant = typeof tileData === 'object' ? tileData.variant : 0;
+
+                    if (tileType === TILE_TYPES.SWITCH) {
+                        gridSwitches.push({ pos: { row: r, col: c }, variant });
+                    } else if (tileType === TILE_TYPES.DOOR) {
+                        gridDoors.push({ pos: { row: r, col: c }, variant });
+                    } else if (tileType === TILE_TYPES.PORTAL) {
                         gridPortals.push({ pos: { row: r, col: c } });
                     }
                 });
@@ -165,57 +185,43 @@ const LevelEditor = () => {
         const left = scanGrid(leftGrid);
         const right = scanGrid(rightGrid);
 
-        // Combine findings (giving unique IDs based on index and side?)
-        // Actually, QuantumEngine doesn't care about side usually, just coordinates.
-        // We'll treat them as a single pool or handle based on game logic.
-        // Simple approach: combine all and link sequentially.
-
         const allSwitches = [...left.gridSwitches, ...right.gridSwitches];
         const allDoors = [...left.gridDoors, ...right.gridDoors];
         const allPortals = [...left.gridPortals, ...right.gridPortals];
 
-        // 1. Process Switches
-        allSwitches.forEach((s, index) => {
+        // 1. Process Switches & Doors (Group by Variant)
+        // All switches of the same color share a variant ID (e.g., switch_v0)
+        // This ensures ANY switch of that color activates ALL doors of that color.
+        allSwitches.forEach((s) => {
+            const id = `switch_v${s.variant}`;
             switches.push({
-                id: `switch_${index}`,
+                id,
                 pos: s.pos,
-                color: 'blue', // Default
-                type: 0
+                color: VARIANTS[s.variant]?.name.toLowerCase() || 'blue',
+                type: 0, // Toggle
+                variant: s.variant
             });
         });
 
-        // 2. Process Doors (Link to switches)
-        // Heuristic: Door[i] is controlled by Switch[i % numSwitches]
+        // Link doors to switches of same variant
         allDoors.forEach((d, index) => {
-            const switchIndex = allSwitches.length > 0 ? index % allSwitches.length : -1;
-            const switchId = switchIndex >= 0 ? `switch_${switchIndex}` : null;
-
+            const switchId = `switch_v${d.variant}`;
             doors.push({
                 id: `door_${index}`,
                 pos: d.pos,
-                switchId: switchId
+                switchId: switchId,
+                variant: d.variant
             });
         });
 
         // 3. Process Portals (Link keys to targets)
-        // Heuristic: Portal[0] <-> Portal[1], Portal[2] <-> Portal[3]
-        // If odd, last one loops to itself or first?. Let's do bidirectional pairs.
         for (let i = 0; i < allPortals.length; i += 2) {
             if (i + 1 < allPortals.length) {
                 const p1 = allPortals[i];
                 const p2 = allPortals[i + 1];
 
-                // P1 targets P2
-                portals.push({
-                    pos: p1.pos,
-                    target: p2.pos
-                });
-
-                // P2 targets P1
-                portals.push({
-                    pos: p2.pos,
-                    target: p1.pos
-                });
+                portals.push({ pos: p1.pos, target: p2.pos });
+                portals.push({ pos: p2.pos, target: p1.pos });
             }
         }
 
@@ -229,10 +235,10 @@ const LevelEditor = () => {
             return;
         }
 
-        const hasStartLeft = gridLeft.some(row => row.includes(TILE_TYPES.START));
-        const hasGoalLeft = gridLeft.some(row => row.includes(TILE_TYPES.GOAL));
-        const hasStartRight = gridRight.some(row => row.includes(TILE_TYPES.START));
-        const hasGoalRight = gridRight.some(row => row.includes(TILE_TYPES.GOAL));
+        const hasStartLeft = gridLeft.some(row => row.some(cell => (typeof cell === 'object' ? cell.type : cell) === TILE_TYPES.START));
+        const hasGoalLeft = gridLeft.some(row => row.some(cell => (typeof cell === 'object' ? cell.type : cell) === TILE_TYPES.GOAL));
+        const hasStartRight = gridRight.some(row => row.some(cell => (typeof cell === 'object' ? cell.type : cell) === TILE_TYPES.START));
+        const hasGoalRight = gridRight.some(row => row.some(cell => (typeof cell === 'object' ? cell.type : cell) === TILE_TYPES.GOAL));
 
         if (!hasStartLeft || !hasGoalLeft || !hasStartRight || !hasGoalRight) {
             alert('Both grids must have a START (green) and GOAL (yellow) tile');
@@ -280,9 +286,6 @@ const LevelEditor = () => {
             if (response.ok) {
                 alert(`Level ${id ? 'updated' : 'saved'} successfully!`);
                 if (!id) {
-                    // Redirect to edit mode or clear form if creating new
-                    // logical choice: keep editing the newly created level or clear?
-                    // Let's clear for now to stay consistent with previous behavior
                     setLevelName('');
                     setDescription('');
                     initializeGrids(dimensions.rows, dimensions.cols);
@@ -304,92 +307,103 @@ const LevelEditor = () => {
         }
     };
 
+    const isVariantTool = (type) => {
+        const meta = TILE_METADATA.find(t => t.type === type);
+        return meta?.hasVariants;
+    };
+
     return (
         <div className="level-editor">
             {/* Top Bar */}
             <div className="editor-topbar">
                 <div className="editor-controls">
-                    <button
-                        className="btn-back"
-                        onClick={() => navigate('/my-levels')}
-                        title="Back to My Levels"
-                    >
-                        ← Back
-                    </button>
+                    {/* Row 1: Main Controls */}
+                    <div className="editor-row">
+                        <button
+                            className="btn-back"
+                            onClick={() => navigate('/my-levels')}
+                            title="Back to My Levels"
+                        >
+                            ← Back
+                        </button>
 
-                    <div className="control-group">
-                        <label>Level Name:</label>
-                        <input
-                            type="text"
-                            value={levelName}
-                            onChange={(e) => setLevelName(e.target.value)}
-                            placeholder="Enter level name"
-                            maxLength={100}
-                        />
+                        <div className="control-group" style={{ flex: 2 }}>
+                            <label>Level Name:</label>
+                            <input
+                                type="text"
+                                value={levelName}
+                                onChange={(e) => setLevelName(e.target.value)}
+                                placeholder="Enter level name"
+                                maxLength={100}
+                            />
+                        </div>
+
+                        <div className="control-group">
+                            <label>Rows:</label>
+                            <input
+                                type="number"
+                                value={dimensions.rows}
+                                onChange={(e) => handleDimensionChange('rows', e.target.value)}
+                                min={5}
+                                max={30}
+                            />
+                        </div>
+
+                        <div className="control-group">
+                            <label>Columns:</label>
+                            <input
+                                type="number"
+                                value={dimensions.cols}
+                                onChange={(e) => handleDimensionChange('cols', e.target.value)}
+                                min={5}
+                                max={30}
+                            />
+                        </div>
+
+                        <div className="control-group">
+                            <label>Difficulty:</label>
+                            <select value={difficulty} onChange={(e) => setDifficulty(e.target.value)}>
+                                <option value="Easy">Easy</option>
+                                <option value="Medium">Medium</option>
+                                <option value="Hard">Hard</option>
+                                <option value="Expert">Expert</option>
+                            </select>
+                        </div>
+
+                        <div className="control-group">
+                            <label>Par Moves:</label>
+                            <input
+                                type="number"
+                                value={parMoves}
+                                onChange={(e) => setParMoves(parseInt(e.target.value))}
+                                min={1}
+                                max={999}
+                            />
+                        </div>
                     </div>
 
-                    <div className="control-group">
-                        <label>Description:</label>
-                        <textarea
-                            value={description}
-                            onChange={(e) => setDescription(e.target.value)}
-                            placeholder="Enter level description"
-                            maxLength={500}
-                            rows={2}
-                            style={{
-                                width: '100%',
-                                padding: '0.5rem',
-                                borderRadius: '4px',
-                                border: '1px solid rgba(255, 255, 255, 0.2)',
-                                background: 'rgba(0, 0, 0, 0.3)',
-                                color: '#fff',
-                                fontFamily: 'inherit',
-                                resize: 'vertical'
-                            }}
-                        />
-                    </div>
-
-                    <div className="control-group">
-                        <label>Rows:</label>
-                        <input
-                            type="number"
-                            value={dimensions.rows}
-                            onChange={(e) => handleDimensionChange('rows', e.target.value)}
-                            min={5}
-                            max={30}
-                        />
-                    </div>
-
-                    <div className="control-group">
-                        <label>Columns:</label>
-                        <input
-                            type="number"
-                            value={dimensions.cols}
-                            onChange={(e) => handleDimensionChange('cols', e.target.value)}
-                            min={5}
-                            max={30}
-                        />
-                    </div>
-
-                    <div className="control-group">
-                        <label>Difficulty:</label>
-                        <select value={difficulty} onChange={(e) => setDifficulty(e.target.value)}>
-                            <option value="Easy">Easy</option>
-                            <option value="Medium">Medium</option>
-                            <option value="Hard">Hard</option>
-                            <option value="Expert">Expert</option>
-                        </select>
-                    </div>
-
-                    <div className="control-group">
-                        <label>Par Moves:</label>
-                        <input
-                            type="number"
-                            value={parMoves}
-                            onChange={(e) => setParMoves(parseInt(e.target.value))}
-                            min={1}
-                            max={999}
-                        />
+                    {/* Row 2: Description (Full Width) */}
+                    <div className="editor-row">
+                        <div className="control-group full-width">
+                            <label>Description:</label>
+                            <textarea
+                                value={description}
+                                onChange={(e) => setDescription(e.target.value)}
+                                placeholder="Enter level description"
+                                maxLength={500}
+                                rows={2}
+                                style={{
+                                    width: '100%',
+                                    padding: '0.5rem',
+                                    borderRadius: '4px',
+                                    border: '1px solid rgba(255, 255, 255, 0.2)',
+                                    background: 'rgba(0, 0, 0, 0.3)',
+                                    color: '#fff',
+                                    fontFamily: 'inherit',
+                                    resize: 'vertical'
+                                }}
+                            />
+                        </div>
                     </div>
                 </div>
 
@@ -408,21 +422,65 @@ const LevelEditor = () => {
                 <h3>🎨 Toolbox</h3>
                 <div className="tool-buttons">
                     {TILE_METADATA.map((tile) => (
-                        <button
-                            key={tile.type}
-                            className={`tool-btn ${selectedTool === tile.type ? 'active' : ''}`}
-                            onClick={() => setSelectedTool(tile.type)}
-                            title={tile.name}
-                        >
-                            <div
-                                className={`tool-preview ${tile.type}`}
+                        <div key={tile.type} className="tool-btn-wrapper" style={{ position: 'relative' }}>
+                            <button
+                                className={`tool-btn ${selectedTool === tile.type ? 'active' : ''}`}
+                                onClick={() => setSelectedTool(tile.type)}
+                                title={tile.name}
                             >
-                                <span className="tool-icon">{tile.icon}</span>
-                            </div>
-                            <span className="tool-name">{tile.name}</span>
-                        </button>
+                                <div
+                                    className={`tool-preview ${tile.type}`}
+                                >
+                                    <span className="tool-icon">{tile.icon}</span>
+                                </div>
+                                <span className="tool-name">{tile.name}</span>
+
+                                {/* Indicator for selected variant */}
+                                {selectedTool === tile.type && tile.hasVariants && (
+                                    <div
+                                        className="tool-variant-indicator"
+                                        style={{
+                                            background: VARIANTS.find(v => v.id === selectedVariant)?.color,
+                                            width: '100%',
+                                            height: '4px',
+                                            borderRadius: '2px',
+                                            marginTop: '4px',
+                                            boxShadow: `0 0 5px ${VARIANTS.find(v => v.id === selectedVariant)?.color}`
+                                        }}
+                                    ></div>
+                                )}
+                            </button>
+
+                            {/* Pop-up Color Selector */}
+                            {selectedTool === tile.type && tile.hasVariants && (
+                                <div className="variant-popup">
+                                    <div className="variant-popup-arrow"></div>
+                                    <span className="variant-popup-label">Select Color</span>
+                                    <div className="variant-options">
+                                        {VARIANTS.map(v => (
+                                            <button
+                                                key={v.id}
+                                                className={`variant-btn ${selectedVariant === v.id ? 'active' : ''}`}
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    setSelectedVariant(v.id);
+                                                }}
+                                                title={v.name}
+                                                style={{
+                                                    borderColor: selectedVariant === v.id ? '#fff' : 'transparent',
+                                                    boxShadow: selectedVariant === v.id ? `0 0 10px ${v.color}` : 'none'
+                                                }}
+                                            >
+                                                <div className="variant-dot" style={{ background: v.color }}></div>
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
                     ))}
                 </div>
+
                 <div className="tool-hint">
                     💡 Click on a tile to place the selected element. (Click-only mode)
                 </div>
@@ -457,8 +515,8 @@ const LevelEditor = () => {
                     <li><strong>Select a tool</strong> from the toolbox above</li>
                     <li><strong>Click</strong> on tiles to place the selected tool</li>
                     <li>Both grids must have a <strong>START</strong> (🟢) and <strong>GOAL</strong> (🟡) tile</li>
+                    <li>For <strong>Switches & Doors</strong>, select a color to link them logically!</li>
                     <li>Adjust grid size (5-30 rows/cols) as needed</li>
-                    <li>Set difficulty and par moves for star rating calculation</li>
                 </ul>
             </div>
         </div>

@@ -18,7 +18,7 @@ const customLevelSchema = new mongoose.Schema({
         default: 'Medium'
     },
     gridLeft: {
-        type: [[Number]],
+        type: [[mongoose.Schema.Types.Mixed]],
         required: [true, 'Left grid is required'],
         validate: {
             validator: function (grid) {
@@ -30,7 +30,7 @@ const customLevelSchema = new mongoose.Schema({
         }
     },
     gridRight: {
-        type: [[Number]],
+        type: [[mongoose.Schema.Types.Mixed]],
         required: [true, 'Right grid is required'],
         validate: {
             validator: function (grid) {

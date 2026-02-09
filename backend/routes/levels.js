@@ -232,7 +232,7 @@ router.get('/all/combined', async (req, res) => {
         // Fetch active custom levels
         const customLevels = await CustomLevel.find({ isActive: true })
             .populate('creatorId', 'username')
-            .sort({ createdAt: -1 })
+            .sort({ createdAt: 1 })
             .lean();
 
         // Format official levels

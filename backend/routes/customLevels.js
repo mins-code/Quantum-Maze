@@ -65,7 +65,7 @@ router.post('/', protect, async (req, res) => {
 
     } catch (error) {
         console.error('Error creating custom level:', error);
-        
+
         // Handle validation errors
         if (error.name === 'ValidationError') {
             return res.status(400).json({
@@ -96,7 +96,7 @@ router.get('/', async (req, res) => {
         // Fetch levels sorted by creation date (newest first)
         const customLevels = await CustomLevel.find({ isActive: true })
             .populate('creatorId', 'username')
-            .sort({ createdAt: -1 })
+            .sort({ createdAt: 1 })
             .limit(limit)
             .skip(skip)
             .lean();
@@ -269,7 +269,7 @@ router.put('/:id', protect, async (req, res) => {
 
     } catch (error) {
         console.error('Error updating custom level:', error);
-        
+
         // Handle validation errors
         if (error.name === 'ValidationError') {
             return res.status(400).json({
@@ -339,7 +339,7 @@ router.get('/user/:userId', async (req, res) => {
             isActive: true
         })
             .populate('creatorId', 'username')
-            .sort({ createdAt: -1 })
+            .sort({ createdAt: 1 })
             .lean();
 
         res.status(200).json({

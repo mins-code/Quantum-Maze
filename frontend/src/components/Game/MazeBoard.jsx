@@ -118,7 +118,11 @@ const MazeBoard = ({
                 }}
             >
                 {gridData.map((row, rowIndex) => (
-                    row.map((tileType, colIndex) => {
+                    row.map((cellData, colIndex) => {
+                        // Handle both primitive (int) and object ({type, variant}) tile data
+                        const tileType = typeof cellData === 'object' ? cellData.type : cellData;
+                        const tileVariant = typeof cellData === 'object' ? cellData.variant : undefined;
+
                         const isPlayer =
                             playerPosition &&
                             playerPosition.row === rowIndex &&
@@ -130,6 +134,10 @@ const MazeBoard = ({
                             ghostPos.col === colIndex;
 
                         const mechanicProps = getMechanicProps(rowIndex, colIndex, tileType);
+
+                        // If variant is explicitly set in grid (Editor), use it. 
+                        // Otherwise fallback to mechanicProps (Game).
+                        const finalVariant = tileVariant !== undefined ? tileVariant : mechanicProps.variant;
 
                         // Fog of War: Check if tile is visible based on player position
                         const isVisible = playerPosition
@@ -144,7 +152,7 @@ const MazeBoard = ({
                                 playerSide={playerSide}
                                 isActive={mechanicProps.isActive}
                                 isOpen={mechanicProps.isOpen}
-                                variant={mechanicProps.variant}
+                                variant={finalVariant}
                                 isGhost={isGhost}
                                 isFogged={!isVisible}
                                 currentMoveCount={currentMoveCount}
